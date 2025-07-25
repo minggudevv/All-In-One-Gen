@@ -150,10 +150,12 @@ export default function IdentityViewPage() {
                                 <p className="text-sm font-semibold text-muted-foreground">Full Address</p>
                                 <p className="text-lg">{`${location.street.number} ${location.street.name}, ${location.city}, ${location.state} ${location.postcode}, ${location.country}`}</p>
                             </div>
-                            <MapView 
-                                lat={parseFloat(location.coordinates.latitude)}
-                                lon={parseFloat(location.coordinates.longitude)}
-                            />
+                           {typeof window !== 'undefined' && (
+                                <MapView 
+                                    lat={parseFloat(location.coordinates.latitude)}
+                                    lon={parseFloat(location.coordinates.longitude)}
+                                />
+                           )}
                         </div>
                     </InfoCard>
                     

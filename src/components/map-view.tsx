@@ -12,18 +12,6 @@ const customIcon = new Icon({
 
 
 const MapView = ({ lat, lon }: { lat: number; lon: number }) => {
-    const [isClient, setIsClient] = useState(false);
-
-    useEffect(() => {
-        // This will run only on the client side, after the initial render.
-        setIsClient(true);
-    }, []);
-    
-    // Render nothing on the server or during the initial client-side render
-    if (!isClient) {
-        return <div style={{ height: "200px", width: "100%" }} className="rounded-md bg-muted animate-pulse" />;
-    }
-
     return (
         <div style={{ height: "200px", width: "100%" }}>
             <MapContainer
