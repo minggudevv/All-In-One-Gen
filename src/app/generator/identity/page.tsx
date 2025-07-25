@@ -24,8 +24,10 @@ import {
   Save,
   LogIn,
   Sparkles,
+  Expand,
 } from "lucide-react";
 import Link from "next/link";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const MapView = dynamic(() => import("@/components/map-view"), {
   ssr: false,
@@ -63,6 +65,10 @@ export default function IdentityGeneratorPage() {
     while(!validIdentity) {
       try {
         const response = await fetch("https://randomuser.me/api/?nat=us");
+        if (!response.ok) {
+            // Handle HTTP errors like 404 or 500
+            throw new Error(`Network response was not ok: ${response.statusText}`);
+        }
         const data = await response.json();
         const result = data.results[0];
         
