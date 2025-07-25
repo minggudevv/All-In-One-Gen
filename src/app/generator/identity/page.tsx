@@ -9,6 +9,7 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import type { Identity } from "@/types";
 import { enhanceIdentity } from "@/ai/flows/enhance-identity-generation";
+import dynamic from "next/dynamic";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +26,11 @@ import {
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
+
+const MapView = dynamic(() => import("@/components/map-view"), {
+  ssr: false,
+  loading: () => <div className="rounded-md overflow-hidden h-48 bg-muted flex items-center justify-center mt-4"><p className="text-muted-foreground text-sm">Loading map...</p></div>
+});
 
 export default function IdentityGeneratorPage() {
   const [identity, setIdentity] = useState<Identity | null>(null);
@@ -113,12 +119,13 @@ export default function IdentityGeneratorPage() {
     }
   };
 
-  const IdentityInfoRow = ({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) => (
+  const IdentityInfoRow = ({ icon, label, value, children }: { icon: React.ReactNode, label: string, value?: string, children?: React.ReactNode }) => (
     <div className="flex items-start space-x-4">
       <div className="flex-shrink-0 text-muted-foreground">{icon}</div>
       <div>
         <p className="text-sm font-semibold text-muted-foreground">{label}</p>
-        <p className="text-md">{value}</p>
+        {value && <p className="text-md">{value}</p>}
+        {children}
       </div>
     </div>
   );
@@ -173,7 +180,14 @@ export default function IdentityGeneratorPage() {
                 <IdentityInfoRow icon={<User className="h-5 w-5" />} label="Full Name" value={`${identity.name.title}. ${identity.name.first} ${identity.name.last}`} />
                 <IdentityInfoRow icon={<Mail className="h-5 w-5" />} label="Email Address" value={identity.email} />
                 <IdentityInfoRow icon={<Phone className="h-5 w-5" />} label="Phone Number" value={identity.phone} />
-                <IdentityInfoRow icon={<MapPin className="h-5 w-5" />} label="Address" value={`${identity.location.street.number} ${identity.location.street.name}, ${identity.location.city}, ${identity.location.state} ${identity.location.postcode}`} />
+                <IdentityInfoRow icon={<MapPin className="h-5 w-5" />} label="Address" value={`${identity.location.street.number} ${identity.location.street.name}, ${identity.location.city}, ${identity.location.state} ${identity.location.postcode}`}>
+                   <div className="pt-2">
+                       <MapView 
+                          lat={parseFloat(identity.location.coordinates.latitude)}
+                          lon={parseFloat(identity.location.coordinates.longitude)}
+                        />
+                   </div>
+                </IdentityInfoRow>
                 <IdentityInfoRow icon={<Cake className="h-5 w-5" />} label="Date of Birth" value={`${new Date(identity.dob.date).toLocaleDateString()} (Age ${identity.dob.age})`} />
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0 text-muted-foreground"><Sparkles className="h-5 w-5 text-primary" /></div>
