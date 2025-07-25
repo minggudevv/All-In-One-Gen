@@ -87,6 +87,9 @@ const MapView = ({ lat, lon }: { lat: number; lon: number }) => {
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-4xl w-full p-2 sm:p-4">
+           <DialogHeader>
+             <DialogTitle className="sr-only">Peta Diperbesar</DialogTitle>
+           </DialogHeader>
            <MapRenderer lat={lat} lon={lon} isDialog={true} />
         </DialogContent>
       </Dialog>
