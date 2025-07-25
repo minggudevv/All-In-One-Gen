@@ -23,7 +23,6 @@ import {
   Save,
   LogIn,
   Sparkles,
-  Eye
 } from "lucide-react";
 import Link from "next/link";
 
@@ -111,13 +110,6 @@ export default function IdentityGeneratorPage() {
       });
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  const handleViewOnWeb = () => {
-    if (identity) {
-      sessionStorage.setItem('view-identity', JSON.stringify(identity));
-      window.open('/identity/view', '_blank');
     }
   };
 
@@ -218,10 +210,6 @@ export default function IdentityGeneratorPage() {
                  <Button onClick={fetchIdentity} disabled={loading} size="lg" className="w-full sm:w-auto">
                     <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                     {loading ? "Generating..." : "Generate Again"}
-                </Button>
-                <Button onClick={handleViewOnWeb} disabled={loading} size="lg" variant="secondary" className="w-full sm:w-auto">
-                    <Eye className="mr-2 h-4 w-4" />
-                    View on Web
                 </Button>
             </div>
           {user ? (

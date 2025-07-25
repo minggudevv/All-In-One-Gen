@@ -20,15 +20,16 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
   } from "@/components/ui/alert-dialog"
-import { MoreHorizontal, Copy, Trash2 } from "lucide-react";
+import { MoreHorizontal, Copy, Trash2, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ActionsMenuProps {
     onDelete: () => void;
+    onView?: () => void;
     copyItems: { label: string; value: string }[];
 }
 
-export function ActionsMenu({ onDelete, copyItems }: ActionsMenuProps) {
+export function ActionsMenu({ onDelete, onView, copyItems }: ActionsMenuProps) {
     const { toast } = useToast();
 
     const copyToClipboard = (value: string, label: string) => {
@@ -47,6 +48,12 @@ export function ActionsMenu({ onDelete, copyItems }: ActionsMenuProps) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            {onView && (
+                <DropdownMenuItem onClick={onView}>
+                    <Eye className="mr-2 h-4 w-4" />
+                    View on Web
+                </DropdownMenuItem>
+            )}
             {copyItems.map(item => (
                 <DropdownMenuItem key={item.label} onClick={() => copyToClipboard(item.value, item.label)}>
                     <Copy className="mr-2 h-4 w-4" />

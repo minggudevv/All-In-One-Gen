@@ -51,9 +51,16 @@ export const columns = ({ deleteIdentity }: { deleteIdentity: (id: string) => vo
     id: "actions",
     cell: ({ row }) => {
       const identity = row.original;
+      
+      const handleViewOnWeb = () => {
+        sessionStorage.setItem('view-identity', JSON.stringify(identity));
+        window.open('/identity/view', '_blank');
+      };
+
       return (
         <ActionsMenu
           onDelete={() => deleteIdentity(identity.id!)}
+          onView={handleViewOnWeb}
           copyItems={[
             { label: 'Copy JSON', value: JSON.stringify(identity, null, 2) },
             { label: 'Copy Email', value: identity.email },
