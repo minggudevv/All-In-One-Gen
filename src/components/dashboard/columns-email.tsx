@@ -7,7 +7,7 @@ import { ActionsMenu } from "./actions-menu";
 import { Mail } from "lucide-react";
 
 
-export const columns = ({ deleteEmail }: { deleteEmail: (id: string) => void }): ColumnDef<StoredEmail>[] => [
+export const columns = ({ deleteEmail, translations }: { deleteEmail: (id: string) => void, translations: any }): ColumnDef<StoredEmail>[] => [
     {
         accessorKey: 'icon',
         header: '',
@@ -17,15 +17,15 @@ export const columns = ({ deleteEmail }: { deleteEmail: (id: string) => void }):
     },
   {
     accessorKey: "email",
-    header: "Email",
+    header: translations.dashboard.columns.email,
   },
   {
     accessorKey: "createdAt",
-    header: "Saved On",
+    header: translations.dashboard.columns.savedOn,
     cell: ({ row }) => {
         const { createdAt } = row.original;
         if (!createdAt || typeof createdAt.toDate !== 'function') {
-            return "Just now";
+            return translations.dashboard.columns.justNow;
         }
         return format(createdAt.toDate(), "PPpp");
     },
@@ -38,7 +38,7 @@ export const columns = ({ deleteEmail }: { deleteEmail: (id: string) => void }):
         <ActionsMenu
           onDelete={() => deleteEmail(email.id!)}
           copyItems={[
-            { label: 'Copy Email', value: email.email },
+            { label: translations.dashboard.actions.copyEmail, value: email.email },
           ]}
         />
       );

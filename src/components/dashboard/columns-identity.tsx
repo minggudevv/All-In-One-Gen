@@ -7,7 +7,10 @@ import { ActionsMenu } from "./actions-menu";
 import { useRouter } from "next/navigation";
 
 
-export const columns = ({ deleteIdentity, correctIdentityLocation }: { deleteIdentity: (id: string) => void; correctIdentityLocation: (identity: Identity) => void; }): ColumnDef<Identity>[] => [
+export const columns = ({ deleteIdentity, correctIdentityLocation, translations }: { deleteIdentity: (id: string) => void; correctIdentityLocation: (identity: Identity) => void; translations: any }): ColumnDef<Identity>[] => {
+  const router = useRouter();
+  
+  return [
   {
     accessorKey: "picture",
     header: "",
@@ -26,7 +29,7 @@ export const columns = ({ deleteIdentity, correctIdentityLocation }: { deleteIde
   },
   {
     accessorKey: "name",
-    header: "Name",
+    header: translations.dashboard.columns.name,
     cell: ({ row }) => {
       const identity = row.original;
       return `${identity.name.first} ${identity.name.last}`;
@@ -34,15 +37,15 @@ export const columns = ({ deleteIdentity, correctIdentityLocation }: { deleteIde
   },
   {
     accessorKey: "email",
-    header: "Email",
+    header: translations.dashboard.columns.email,
   },
   {
     accessorKey: "phone",
-    header: "Phone",
+    header: translations.dashboard.columns.phone,
   },
   {
     accessorKey: "location",
-    header: "Location",
+    header: translations.dashboard.columns.location,
     cell: ({ row }) => {
       const { location } = row.original;
       return `${location.city}, ${location.country}`;
@@ -52,7 +55,6 @@ export const columns = ({ deleteIdentity, correctIdentityLocation }: { deleteIde
     id: "actions",
     cell: ({ row }) => {
       const identity = row.original;
-      const router = useRouter();
       
       const handleViewOnWeb = () => {
         sessionStorage.setItem('view-identity', JSON.stringify(identity));
@@ -65,12 +67,12 @@ export const columns = ({ deleteIdentity, correctIdentityLocation }: { deleteIde
           onView={handleViewOnWeb}
           onCorrectLocation={() => correctIdentityLocation(identity)}
           copyItems={[
-            { label: 'Copy JSON', value: JSON.stringify(identity, null, 2) },
-            { label: 'Copy Email', value: identity.email },
-            { label: 'Copy Phone', value: identity.phone },
+            { label: translations.dashboard.actions.copyJson, value: JSON.stringify(identity, null, 2) },
+            { label: translations.dashboard.actions.copyEmail, value: identity.email },
+            { label: translations.dashboard.actions.copyPhone, value: identity.phone },
           ]}
         />
       );
     },
   },
-];
+]};

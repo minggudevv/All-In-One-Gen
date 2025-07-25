@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import Link from "next/link";
+import { useLanguage } from "@/hooks/use-language";
 
 const firstNames = ["john", "jane", "alex", "emily", "michael", "sarah", "david", "lisa"];
 const lastNames = ["smith", "doe", "jones", "williams", "brown", "davis", "miller", "wilson"];
@@ -20,6 +21,7 @@ export default function EmailGeneratorPage() {
   const [isSaving, setIsSaving] = useState<string | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
+  const { translations } = useLanguage();
 
   const generateEmails = useCallback(() => {
     const newEmails = Array.from({ length: 8 }, () => {
@@ -40,8 +42,8 @@ export default function EmailGeneratorPage() {
     navigator.clipboard.writeText(email);
     setCopiedEmail(email);
     toast({
-      title: "Copied!",
-      description: `${email} has been copied to your clipboard.`,
+      title: translations.toasts.copied,
+      description: `${email} ${translations.toasts.email.copiedDesc}`,
     });
     setTimeout(() => setCopiedEmail(null), 2000);
   };
@@ -55,15 +57,15 @@ export default function EmailGeneratorPage() {
         createdAt: serverTimestamp(),
       });
       toast({
-        title: "Success!",
-        description: `${email} saved to your dashboard.`,
+        title: translations.toasts.success,
+        description: `${email} ${translations.toasts.email.saveSuccessDesc}`,
       });
     } catch (error) {
       console.error("Failed to save email:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to save email. Please try again.",
+        title: translations.toasts.error,
+        description: translations.toasts.email.saveErrorDesc,
       });
     } finally {
       setIsSaving(null);
@@ -73,18 +75,18 @@ export default function EmailGeneratorPage() {
   return (
     <div className="mx-auto max-w-4xl">
       <div className="text-center mb-12">
-        <h1 className="font-headline text-4xl font-bold tracking-tight lg:text-5xl">Fake Email Generator</h1>
+        <h1 className="font-headline text-4xl font-bold tracking-tight lg:text-5xl">{translations.email.title}</h1>
         <p className="mt-4 text-lg text-muted-foreground">
-          Instantly generate random, disposable email addresses.
+          {translations.email.subtitle}
         </p>
       </div>
 
       <Card className="shadow-lg">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="font-headline">Generated Emails</CardTitle>
+          <CardTitle className="font-headline">{translations.email.cardTitle}</CardTitle>
           <Button onClick={generateEmails} variant="outline">
             <RefreshCw className="mr-2 h-4 w-4" />
-            Regenerate
+            {translations.email.regenerate}
           </Button>
         </CardHeader>
         <CardContent>
@@ -96,7 +98,7 @@ export default function EmailGeneratorPage() {
                   {user && (
                     <Button variant="ghost" size="icon" onClick={() => handleSaveEmail(email)} disabled={isSaving === email}>
                       <Save className={`h-5 w-5 ${isSaving === email ? 'animate-spin' : ''}`} />
-                       <span className="sr-only">Save email</span>
+                       <span className="sr-only">{translations.email.saveEmail}</span>
                     </Button>
                   )}
                   <Button variant="ghost" size="icon" onClick={() => handleCopy(email)}>
@@ -105,7 +107,7 @@ export default function EmailGeneratorPage() {
                     ) : (
                       <Copy className="h-5 w-5" />
                     )}
-                    <span className="sr-only">Copy email</span>
+                    <span className="sr-only">{translations.email.copyEmail}</span>
                   </Button>
                 </div>
               </li>
@@ -115,7 +117,7 @@ export default function EmailGeneratorPage() {
         {!user && (
             <CardFooter>
                  <p className="text-sm text-muted-foreground mx-auto">
-                    <Link href="/login" className="underline font-semibold">Log in</Link> to save emails to your dashboard.
+                    <Link href="/login" className="underline font-semibold">{translations.email.loginPrompt.login}</Link> {translations.email.loginPrompt.message}
                  </p>
             </CardFooter>
         )}
@@ -123,5 +125,3 @@ export default function EmailGeneratorPage() {
     </div>
   );
 }
-
-    
