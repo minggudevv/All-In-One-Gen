@@ -15,27 +15,31 @@ const MapView = ({ lat, lon }: { lat: number; lon: number }) => {
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
+        // This will run only on the client side, after the initial render.
         setIsClient(true);
     }, []);
+    
+    // Render nothing on the server or during the initial client-side render
+    if (!isClient) {
+        return <div style={{ height: "200px", width: "100%" }} className="rounded-md bg-muted animate-pulse" />;
+    }
 
     return (
         <div style={{ height: "200px", width: "100%" }}>
-            {isClient && (
-                <MapContainer
-                center={[lat, lon]}
-                zoom={13}
-                style={{ height: "100%", width: "100%", borderRadius: "var(--radius)"}}
-                scrollWheelZoom={false}
-                >
-                <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <Marker position={[lat, lon]} icon={customIcon}>
-                    <Popup>Approximate location.</Popup>
-                </Marker>
-                </MapContainer>
-            )}
+            <MapContainer
+            center={[lat, lon]}
+            zoom={13}
+            style={{ height: "100%", width: "100%", borderRadius: "var(--radius)"}}
+            scrollWheelZoom={false}
+            >
+            <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <Marker position={[lat, lon]} icon={customIcon}>
+                <Popup>Approximate location.</Popup>
+            </Marker>
+            </MapContainer>
         </div>
     );
 };
