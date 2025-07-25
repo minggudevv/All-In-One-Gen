@@ -18,25 +18,25 @@ const MapView = ({ lat, lon }: { lat: number; lon: number }) => {
         setIsClient(true);
     }, []);
 
-    if (!isClient) {
-        return <div className="rounded-md overflow-hidden h-48 bg-muted flex items-center justify-center"><p className="text-muted-foreground text-sm">Loading map...</p></div>;
-    }
-
     return (
-        <MapContainer
-        center={[lat, lon]}
-        zoom={13}
-        style={{ height: "200px", width: "100%", borderRadius: "var(--radius)"}}
-        scrollWheelZoom={false}
-        >
-        <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        <Marker position={[lat, lon]} icon={customIcon}>
-            <Popup>Approximate location.</Popup>
-        </Marker>
-        </MapContainer>
+        <div style={{ height: "200px", width: "100%" }}>
+            {isClient && (
+                <MapContainer
+                center={[lat, lon]}
+                zoom={13}
+                style={{ height: "100%", width: "100%", borderRadius: "var(--radius)"}}
+                scrollWheelZoom={false}
+                >
+                <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <Marker position={[lat, lon]} icon={customIcon}>
+                    <Popup>Approximate location.</Popup>
+                </Marker>
+                </MapContainer>
+            )}
+        </div>
     );
 };
 
