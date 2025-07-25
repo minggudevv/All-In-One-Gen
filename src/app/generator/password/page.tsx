@@ -8,7 +8,11 @@ import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Check, RefreshCw } from "lucide-react";
+import { Copy, Check, RefreshCw, Save, LogIn } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import Link from "next/link";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export default function PasswordGeneratorPage() {
   const [password, setPassword] = useState("");
@@ -17,7 +21,10 @@ export default function PasswordGeneratorPage() {
   const [includeNumbers, setIncludeNumbers] = useState(true);
   const [includeSymbols, setIncludeSymbols] = useState(true);
   const [isCopied, setIsCopied] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
+
 
   const generatePassword = useCallback(() => {
     const lowerCaseChars = "abcdefghijklmnopqrstuvwxyz";
@@ -52,6 +59,35 @@ export default function PasswordGeneratorPage() {
     });
     setTimeout(() => setIsCopied(false), 2000);
   };
+  
+  const handleSavePassword = async () => {
+    if (!user || !password) return;
+    setIsSaving(true);
+    try {
+      await addDoc(collection(db, `users/${user.uid}/passwords`), {
+        password: password,
+        length: length,
+        includeUppercase: includeUppercase,
+        includeNumbers: includeNumbers,
+        includeSymbols: includeSymbols,
+        createdAt: serverTimestamp(),
+      });
+      toast({
+        title: "Success!",
+        description: "Password saved to your dashboard.",
+      });
+    } catch (error) {
+      console.error("Failed to save password:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to save password. Please try again.",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
 
   const getStrength = () => {
     let strength = 0;
@@ -67,6 +103,13 @@ export default function PasswordGeneratorPage() {
   };
 
   const strength = getStrength();
+  const strengthPercentage = (100 / 5) * (
+    (length >= 16 ? 2 : length >= 12 ? 1 : 0) + 
+    (includeUppercase ? 1 : 0) + 
+    (includeNumbers ? 1 : 0) + 
+    (includeSymbols ? 1 : 0)
+  );
+
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -101,7 +144,7 @@ export default function PasswordGeneratorPage() {
           </div>
           <div className="flex items-center gap-2 mt-2">
             <div className="w-full bg-muted rounded-full h-2.5">
-                <div className={`h-2.5 rounded-full ${strength.color}`} style={{ width: `${(100/5) * (length >= 12 && includeUppercase && includeNumbers && includeSymbols ? 5 : length >= 12 && (includeUppercase || includeNumbers) ? 4 : length >= 8 ? 3 : 2)}%` }}></div>
+                <div className={`h-2.5 rounded-full ${strength.color}`} style={{ width: `${strengthPercentage}%` }}></div>
             </div>
             <span className="text-sm font-medium">{strength.label}</span>
           </div>
@@ -148,11 +191,24 @@ export default function PasswordGeneratorPage() {
             </div>
           </div>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex-col sm:flex-row gap-2">
           <Button onClick={generatePassword} size="lg" className="w-full">
             <RefreshCw className="mr-2 h-4 w-4" />
             Generate New Password
           </Button>
+          {user ? (
+             <Button onClick={handleSavePassword} disabled={isSaving} size="lg" variant="outline" className="w-full">
+                <Save className={`mr-2 h-4 w-4 ${isSaving ? 'animate-pulse' : ''}`} />
+                {isSaving ? "Saving..." : "Save to Dashboard"}
+             </Button>
+          ) : (
+            <Button asChild size="lg" variant="outline" className="w-full">
+                <Link href="/login">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Log in to Save
+                </Link>
+             </Button>
+          )}
         </CardFooter>
       </Card>
     </div>

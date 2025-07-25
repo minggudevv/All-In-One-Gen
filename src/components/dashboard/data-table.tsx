@@ -24,11 +24,15 @@ import { Card } from "@/components/ui/card";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  filterColumn: string;
+  filterPlaceholder: string;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  filterColumn,
+  filterPlaceholder,
 }: DataTableProps<TData, TValue>) {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const table = useReactTable({
@@ -46,10 +50,10 @@ export function DataTable<TData, TValue>({
     <Card>
       <div className="flex items-center p-4">
         <Input
-          placeholder="Filter by name..."
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          placeholder={filterPlaceholder}
+          value={(table.getColumn(filterColumn)?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
+            table.getColumn(filterColumn)?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />

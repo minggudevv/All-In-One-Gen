@@ -1,3 +1,7 @@
+// This file is obsolete and can be removed. I am creating separate column definition files.
+// src/components/dashboard/columns-identity.tsx
+// src/components/dashboard/columns-email.tsx
+// src/components/dashboard/columns-password.tsx
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
@@ -77,9 +81,9 @@ export const columns = ({ deleteIdentity }: ColumnsProps): ColumnDef<Identity>[]
       const identity = row.original;
       const { toast } = useToast();
 
-      const copyToClipboard = () => {
-        navigator.clipboard.writeText(JSON.stringify(identity, null, 2));
-        toast({ title: "Copied!", description: "Identity data copied to clipboard." });
+      const copyToClipboard = (text: string, type: string) => {
+        navigator.clipboard.writeText(text);
+        toast({ title: "Copied!", description: `${type} copied to clipboard.` });
       };
 
       return (
@@ -93,9 +97,9 @@ export const columns = ({ deleteIdentity }: ColumnsProps): ColumnDef<Identity>[]
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem onClick={copyToClipboard}>
-                <Copy className="mr-2 h-4 w-4" />
-                Copy JSON
+                <DropdownMenuItem onClick={() => copyToClipboard(JSON.stringify(identity, null, 2), "Identity JSON")}>
+                    <Copy className="mr-2 h-4 w-4" />
+                    Copy JSON
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <AlertDialogTrigger asChild>

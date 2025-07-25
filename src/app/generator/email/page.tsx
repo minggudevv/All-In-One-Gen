@@ -4,7 +4,11 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, RefreshCw, Check } from "lucide-react";
+import { Copy, RefreshCw, Check, Save, LogIn } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { db } from "@/lib/firebase";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import Link from "next/link";
 
 const firstNames = ["john", "jane", "alex", "emily", "michael", "sarah", "david", "lisa"];
 const lastNames = ["smith", "doe", "jones", "williams", "brown", "davis", "miller", "wilson"];
@@ -13,7 +17,9 @@ const domains = ["gmail.com", "yahoo.com", "outlook.com", "mail.com", "proton.me
 export default function EmailGeneratorPage() {
   const [emails, setEmails] = useState<string[]>([]);
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState<string | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const generateEmails = useCallback(() => {
     const newEmails = Array.from({ length: 8 }, () => {
@@ -39,6 +45,30 @@ export default function EmailGeneratorPage() {
     });
     setTimeout(() => setCopiedEmail(null), 2000);
   };
+  
+  const handleSaveEmail = async (email: string) => {
+    if (!user) return;
+    setIsSaving(email);
+    try {
+      await addDoc(collection(db, `users/${user.uid}/emails`), {
+        email: email,
+        createdAt: serverTimestamp(),
+      });
+      toast({
+        title: "Success!",
+        description: `${email} saved to your dashboard.`,
+      });
+    } catch (error) {
+      console.error("Failed to save email:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to save email. Please try again.",
+      });
+    } finally {
+      setIsSaving(null);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -60,20 +90,35 @@ export default function EmailGeneratorPage() {
         <CardContent>
           <ul className="divide-y divide-border">
             {emails.map((email, index) => (
-              <li key={index} className="flex items-center justify-between py-4">
-                <span className="font-mono text-sm md:text-base text-muted-foreground">{email}</span>
-                <Button variant="ghost" size="icon" onClick={() => handleCopy(email)}>
-                  {copiedEmail === email ? (
-                    <Check className="h-5 w-5 text-green-500" />
-                  ) : (
-                    <Copy className="h-5 w-5" />
+              <li key={index} className="flex items-center justify-between py-3">
+                <span className="font-mono text-sm md:text-base text-muted-foreground break-all pr-4">{email}</span>
+                <div className="flex items-center gap-1">
+                  {user && (
+                    <Button variant="ghost" size="icon" onClick={() => handleSaveEmail(email)} disabled={isSaving === email}>
+                      {isSaving === email ? <Save className="h-5 w-5 animate-pulse" /> : <Save className="h-5 w-5" />}
+                       <span className="sr-only">Save email</span>
+                    </Button>
                   )}
-                  <span className="sr-only">Copy email</span>
-                </Button>
+                  <Button variant="ghost" size="icon" onClick={() => handleCopy(email)}>
+                    {copiedEmail === email ? (
+                      <Check className="h-5 w-5 text-green-500" />
+                    ) : (
+                      <Copy className="h-5 w-5" />
+                    )}
+                    <span className="sr-only">Copy email</span>
+                  </Button>
+                </div>
               </li>
             ))}
           </ul>
         </CardContent>
+        {!user && (
+            <CardFooter>
+                 <p className="text-sm text-muted-foreground mx-auto">
+                    <Link href="/login" className="underline font-semibold">Log in</Link> to save emails to your dashboard.
+                 </p>
+            </CardFooter>
+        )}
       </Card>
     </div>
   );
