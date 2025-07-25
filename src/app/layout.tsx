@@ -3,6 +3,8 @@ import './globals.css';
 import { AuthProvider } from '@/context/auth-context';
 import { Toaster } from "@/components/ui/toaster";
 import Header from '@/components/layout/header';
+import "leaflet/dist/leaflet.css";
+
 
 export const metadata: Metadata = {
   title: 'AllInOneGen',

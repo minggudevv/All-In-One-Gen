@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import type { Identity } from "@/types";
 import {
@@ -17,6 +18,13 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+
+// Dynamically import the map component to avoid SSR issues
+const MapView = dynamic(() => import("@/components/map-view"), {
+  ssr: false,
+  loading: () => <div className="rounded-md overflow-hidden h-48 bg-muted flex items-center justify-center"><p className="text-muted-foreground text-sm">Loading map...</p></div>
+});
+
 
 export default function IdentityViewPage() {
   const [identity, setIdentity] = useState<Identity | null>(null);
@@ -142,9 +150,10 @@ export default function IdentityViewPage() {
                                 <p className="text-sm font-semibold text-muted-foreground">Full Address</p>
                                 <p className="text-lg">{`${location.street.number} ${location.street.name}, ${location.city}, ${location.state} ${location.postcode}, ${location.country}`}</p>
                             </div>
-                             <div className="rounded-md overflow-hidden h-48 bg-muted flex items-center justify-center">
-                                <p className="text-muted-foreground text-sm">[Map Placeholder]</p>
-                            </div>
+                            <MapView 
+                                lat={parseFloat(location.coordinates.latitude)}
+                                lon={parseFloat(location.coordinates.longitude)}
+                            />
                         </div>
                     </InfoCard>
                     

@@ -28,6 +28,10 @@ const BasicIdentitySchema = z.object({
     state: z.string(),
     country: z.string(),
     postcode: z.any(), // Can be string or number
+    coordinates: z.object({
+        latitude: z.string(),
+        longitude: z.string(),
+    }),
   }),
   phone: z.string(),
   dob: z.object({
