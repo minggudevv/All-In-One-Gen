@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ActionsMenu } from "./actions-menu";
 
 
-export const columns = ({ deleteIdentity }: { deleteIdentity: (id: string) => void }): ColumnDef<Identity>[] => [
+export const columns = ({ deleteIdentity, correctIdentityLocation }: { deleteIdentity: (id: string) => void; correctIdentityLocation: (identity: Identity) => void; }): ColumnDef<Identity>[] => [
   {
     accessorKey: "picture",
     header: "",
@@ -61,6 +61,7 @@ export const columns = ({ deleteIdentity }: { deleteIdentity: (id: string) => vo
         <ActionsMenu
           onDelete={() => deleteIdentity(identity.id!)}
           onView={handleViewOnWeb}
+          onCorrectLocation={() => correctIdentityLocation(identity)}
           copyItems={[
             { label: 'Copy JSON', value: JSON.stringify(identity, null, 2) },
             { label: 'Copy Email', value: identity.email },

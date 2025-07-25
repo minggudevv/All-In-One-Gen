@@ -9,6 +9,7 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import type { Identity } from "@/types";
 import { enhanceIdentity } from "@/ai/flows/enhance-identity-generation";
+import { correctLocation } from "@/ai/flows/correct-location-flow";
 import dynamic from "next/dynamic";
 
 import { Button } from "@/components/ui/button";
@@ -24,7 +25,7 @@ import {
   Save,
   LogIn,
   Sparkles,
-  Expand,
+  Compass,
 } from "lucide-react";
 import Link from "next/link";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -52,6 +53,7 @@ export default function IdentityGeneratorPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [backstory, setBackstory] = useState<string | null>(null);
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [isCorrectingMap, setIsCorrectingMap] = useState(false);
 
   const { user } = useAuth();
   const { toast } = useToast();
@@ -124,6 +126,44 @@ export default function IdentityGeneratorPage() {
       setIsEnhancing(false);
     }
   };
+
+  const handleCorrectMap = async () => {
+    if (!identity) return;
+    setIsCorrectingMap(true);
+    try {
+        const fullAddress = `${identity.location.street.number} ${identity.location.street.name}, ${identity.location.city}, ${identity.location.state} ${identity.location.postcode}, ${identity.location.country}`;
+        const result = await correctLocation({ address: fullAddress });
+        
+        setIdentity(prevIdentity => {
+            if (!prevIdentity) return null;
+            return {
+                ...prevIdentity,
+                location: {
+                    ...prevIdentity.location,
+                    coordinates: {
+                        latitude: result.latitude,
+                        longitude: result.longitude,
+                    }
+                }
+            }
+        });
+
+        toast({
+            title: "Success!",
+            description: "Map location has been corrected by AI.",
+        });
+
+    } catch (error) {
+        console.error("Failed to correct location:", error);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to correct map location.",
+        });
+    } finally {
+        setIsCorrectingMap(false);
+    }
+  }
 
   const handleSaveIdentity = async () => {
     if (!user || !identity) return;
@@ -217,6 +257,16 @@ export default function IdentityGeneratorPage() {
                           lat={parseFloat(identity.location.coordinates.latitude)}
                           lon={parseFloat(identity.location.coordinates.longitude)}
                         />
+                        {user ? (
+                             <Button variant="outline" size="sm" className="mt-2" onClick={handleCorrectMap} disabled={isCorrectingMap}>
+                                <Compass className={`mr-2 h-4 w-4 ${isCorrectingMap ? 'animate-spin' : ''}`} />
+                                {isCorrectingMap ? "Correcting..." : "Correct Map Location"}
+                            </Button>
+                        ) : (
+                            <p className="text-xs text-muted-foreground mt-2">
+                                <Link href="/login" className="underline">Log in</Link> for a more accurate map.
+                            </p>
+                        )}
                    </div>
                 </IdentityInfoRow>
                 <IdentityInfoRow icon={<Cake className="h-5 w-5" />} label="Date of Birth" value={`${new Date(identity.dob.date).toLocaleDateString()} (Age ${identity.dob.age})`} />

@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
-import { collection, query, orderBy, onSnapshot, doc, deleteDoc } from "firebase/firestore";
+import { collection, query, orderBy, onSnapshot, doc, deleteDoc, updateDoc } from "firebase/firestore";
 import type { Identity, StoredEmail, StoredPassword } from "@/types";
 import { columns as identityColumns } from "@/components/dashboard/columns-identity";
 import { columns as emailColumns } from "@/components/dashboard/columns-email";
@@ -17,6 +17,7 @@ import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { correctLocation } from "@/ai/flows/correct-location-flow";
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
@@ -77,6 +78,37 @@ export default function DashboardPage() {
       })
     }
   }, [user, toast]);
+
+  const correctIdentityLocation = useCallback(async (identity: Identity) => {
+    if (!user || !identity.id) return;
+    
+    toast({ title: "Correcting Location...", description: "AI is working to find the correct coordinates." });
+    
+    try {
+        const fullAddress = `${identity.location.street.number} ${identity.location.street.name}, ${identity.location.city}, ${identity.location.state} ${identity.location.postcode}, ${identity.location.country}`;
+        const result = await correctLocation({ address: fullAddress });
+
+        const identityRef = doc(db, `users/${user.uid}/identities`, identity.id);
+        await updateDoc(identityRef, {
+            "location.coordinates.latitude": result.latitude,
+            "location.coordinates.longitude": result.longitude,
+        });
+
+        toast({
+            title: "Success!",
+            description: "Map location has been corrected and saved.",
+        });
+
+    } catch (error) {
+        console.error("Failed to correct location:", error);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to correct map location.",
+        });
+    }
+  }, [user, toast]);
+
 
   const deleteIdentity = (id: string) => deleteItem("identities", id);
   const deleteEmail = (id: string) => deleteItem("emails", id);
@@ -145,7 +177,7 @@ export default function DashboardPage() {
 
         <TabsContent value="identities">
           {identities.length > 0 ? (
-            <DataTable columns={identityColumns({ deleteIdentity })} data={identities} filterColumn="name" filterPlaceholder="Filter by name..." />
+            <DataTable columns={identityColumns({ deleteIdentity, correctIdentityLocation })} data={identities} filterColumn="name" filterPlaceholder="Filter by name..." />
           ) : (
             <EmptyState title="No Identities Saved" description="You haven't saved any identities yet. Start by generating one!" cta="Generate an Identity" href="/generator/identity" />
           )}
