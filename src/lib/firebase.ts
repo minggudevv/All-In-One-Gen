@@ -1,14 +1,18 @@
+// Import the functions you need from the SDKs you need
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+// Import getAnalytics conditionally
+import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyA-xxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "your-project-id.firebaseapp.com",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "your-project-id",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "your-project-id.appspot.com",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "your-sender-id",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "your-app-id",
+  apiKey: "AIzaSyD01Jum-DrQ5UKBhzE0QFWnO_q_7hMeTMU",
+  authDomain: "all-in-one-gen.firebaseapp.com",
+  projectId: "all-in-one-gen",
+  storageBucket: "all-in-one-gen.firebasestorage.app",
+  messagingSenderId: "303608771343",
+  appId: "1:303608771343:web:1be5817b18d07ee6a5847a",
+  measurementId: "G-YPQSMY1SRH"
 };
 
 // Initialize Firebase
@@ -16,4 +20,10 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-export { app, auth, db };
+// Initialize Analytics only in the browser environment
+let analytics;
+if (typeof window !== 'undefined') {
+  analytics = getAnalytics(app);
+}
+
+export { app, auth, db, analytics };

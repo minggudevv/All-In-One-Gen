@@ -67,24 +67,25 @@ export default function IdentityGeneratorPage() {
   useEffect(() => {
     fetchIdentity();
   }, [fetchIdentity]);
-
-  useEffect(() => {
-    if (identity && !backstory) {
-      const generateBackstory = async () => {
-        setIsEnhancing(true);
-        try {
-          const result = await enhanceIdentity(identity);
-          setBackstory(result.enhancedBackstory);
-        } catch (error) {
-          console.error("Failed to enhance identity:", error);
-          setBackstory("Could not generate a backstory.");
-        } finally {
-          setIsEnhancing(false);
-        }
-      };
-      generateBackstory();
+  
+  const generateBackstory = async () => {
+    if (!identity) return;
+    setIsEnhancing(true);
+    try {
+      const result = await enhanceIdentity(identity);
+      setBackstory(result.enhancedBackstory);
+    } catch (error) {
+      console.error("Failed to enhance identity:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to generate backstory."
+      });
+      setBackstory("Could not generate a backstory.");
+    } finally {
+      setIsEnhancing(false);
     }
-  }, [identity, backstory]);
+  };
 
   const handleSaveIdentity = async () => {
     if (!user || !identity) return;
@@ -177,13 +178,25 @@ export default function IdentityGeneratorPage() {
                   <div className="flex-shrink-0 text-muted-foreground"><Sparkles className="h-5 w-5 text-primary" /></div>
                    <div>
                       <p className="text-sm font-semibold text-muted-foreground">AI Generated Backstory</p>
-                      {isEnhancing ? (
-                        <div className="space-y-2 pt-1">
-                          <Skeleton className="h-4 w-full" />
-                          <Skeleton className="h-4 w-5/6" />
-                        </div>
-                      ) : (
+                      {backstory ? (
                         <p className="text-md italic">"{backstory}"</p>
+                      ) : (
+                        <div>
+                          {isEnhancing ? (
+                            <div className="space-y-2 pt-1">
+                              <Skeleton className="h-4 w-full" />
+                              <Skeleton className="h-4 w-5/6" />
+                            </div>
+                          ) : (
+                            user ? (
+                              <Button variant="link" className="p-0 h-auto" onClick={generateBackstory}>Generate Backstory</Button>
+                            ) : (
+                              <p className="text-sm text-muted-foreground">
+                                <Link href="/login" className="underline">Log in</Link> to generate a backstory.
+                              </p>
+                            )
+                          )}
+                        </div>
                       )}
                     </div>
                 </div>
