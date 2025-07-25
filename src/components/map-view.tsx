@@ -1,47 +1,66 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import { Icon } from "leaflet";
-import { useState, useEffect } from "react";
+import { useEffect, useRef } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
-// Definisikan ikon kustom di luar komponen untuk mencegah pembuatan ulang
-const customIcon = new Icon({
+// Definisikan ikon kustom untuk menghindari masalah dengan path gambar
+const customIcon = new L.Icon({
   iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
 });
 
 const MapView = ({ lat, lon }: { lat: number; lon: number }) => {
-    // Gunakan state untuk menunda rendering peta hingga komponen ter-mount di klien
-    const [isClient, setIsClient] = useState(false);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<L.Map | null>(null);
 
-    useEffect(() => {
-        setIsClient(true);
-    }, []);
+  useEffect(() => {
+    // Pastikan kode ini hanya berjalan di klien dan elemen kontainer sudah ada
+    if (typeof window !== "undefined" && mapContainerRef.current) {
+      
+      // Hanya inisialisasi peta jika belum ada instance
+      if (!mapRef.current) {
+        const map = L.map(mapContainerRef.current, {
+          center: [lat, lon],
+          zoom: 13,
+          scrollWheelZoom: false,
+        });
 
-    // Jangan render apa pun di sisi server atau sebelum komponen ter-mount
-    if (!isClient) {
-        return null;
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        L.marker([lat, lon], { icon: customIcon })
+         .addTo(map)
+         .bindPopup("Approximate location.");
+
+        mapRef.current = map;
+      } else {
+        // Jika peta sudah ada, cukup perbarui view-nya
+        mapRef.current.setView([lat, lon], 13);
+      }
     }
 
-    return (
-        <div style={{ height: "200px", width: "100%" }}>
-            <MapContainer
-                center={[lat, lon]}
-                zoom={13}
-                style={{ height: "100%", width: "100%", borderRadius: "var(--radius)"}}
-                scrollWheelZoom={false}
-            >
-                <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <Marker position={[lat, lon]} icon={customIcon}>
-                    <Popup>Approximate location.</Popup>
-                </Marker>
-            </MapContainer>
-        </div>
-    );
+    // Fungsi cleanup untuk menghancurkan instance peta saat komponen dibongkar
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
+  }, [lat, lon]);
+
+  return (
+    <div 
+      ref={mapContainerRef} 
+      style={{ height: "200px", width: "100%", borderRadius: "var(--radius)" }}
+    />
+  );
 };
 
 export default MapView;
