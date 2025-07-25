@@ -33,7 +33,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 
 const MapView = dynamic(() => import("@/components/map-view"), {
   ssr: false,
-  loading: () => <div className="rounded-md overflow-hidden h-48 bg-muted flex items-center justify-center mt-4"><p className="text-muted-foreground text-sm">Loading map...</p></div>
+  loading: () => <div className="rounded-md overflow-hidden h-48 bg-muted flex items-center justify-center"><p className="text-muted-foreground text-sm">Loading map...</p></div>
 });
 
 const isLand = (lat: number, lon: number) => {
@@ -55,6 +55,8 @@ export default function IdentityGeneratorPage() {
   const [backstory, setBackstory] = useState<string | null>(null);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isCorrectingMap, setIsCorrectingMap] = useState(false);
+  const [displayedBackstory, setDisplayedBackstory] = useState("");
+
 
   const { user } = useAuth();
   const { toast } = useToast();
@@ -63,6 +65,7 @@ export default function IdentityGeneratorPage() {
   const fetchIdentity = useCallback(async (retryCount = 0) => {
     setLoading(true);
     setBackstory(null);
+    setDisplayedBackstory("");
   
     try {
       const response = await fetch("https://randomuser.me/api/?nat=us");
@@ -119,6 +122,8 @@ export default function IdentityGeneratorPage() {
   const generateBackstory = async () => {
     if (!identity) return;
     setIsEnhancing(true);
+    setDisplayedBackstory("");
+    setBackstory(null);
     try {
       const result = await enhanceIdentity(identity);
       setBackstory(result.enhancedBackstory);
@@ -134,6 +139,21 @@ export default function IdentityGeneratorPage() {
       setIsEnhancing(false);
     }
   };
+
+  useEffect(() => {
+    if (backstory) {
+      let i = 0;
+      const interval = setInterval(() => {
+        setDisplayedBackstory(backstory.slice(0, i + 1));
+        i++;
+        if (i >= backstory.length) {
+          clearInterval(interval);
+        }
+      }, 20); // Adjust typing speed here (milliseconds)
+      return () => clearInterval(interval);
+    }
+  }, [backstory]);
+
 
   const handleCorrectMap = async () => {
     if (!identity) return;
@@ -282,23 +302,21 @@ export default function IdentityGeneratorPage() {
                   <div className="flex-shrink-0 text-muted-foreground"><Sparkles className="h-5 w-5 text-primary" /></div>
                    <div>
                       <p className="text-sm font-semibold text-muted-foreground">AI Generated Backstory</p>
-                      {backstory ? (
-                        <p className="text-md italic">"{backstory}"</p>
+                      {isEnhancing ? (
+                        <div className="space-y-2 pt-1">
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-5/6" />
+                        </div>
+                      ) : backstory ? (
+                        <p className="text-md italic">"{displayedBackstory}"</p>
                       ) : (
                         <div>
-                          {isEnhancing ? (
-                            <div className="space-y-2 pt-1">
-                              <Skeleton className="h-4 w-full" />
-                              <Skeleton className="h-4 w-5/6" />
-                            </div>
+                          {user ? (
+                            <Button variant="link" className="p-0 h-auto" onClick={generateBackstory}>Generate Backstory</Button>
                           ) : (
-                            user ? (
-                              <Button variant="link" className="p-0 h-auto" onClick={generateBackstory}>Generate Backstory</Button>
-                            ) : (
-                              <p className="text-sm text-muted-foreground">
-                                <Link href="/login" className="underline">Log in</Link> to generate a backstory.
-                              </p>
-                            )
+                            <p className="text-sm text-muted-foreground">
+                              <Link href="/login" className="underline">Log in</Link> to generate a backstory.
+                            </p>
                           )}
                         </div>
                       )}
