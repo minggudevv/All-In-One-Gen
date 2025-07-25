@@ -8,12 +8,6 @@ import { useRouter } from "next/navigation";
 
 
 export const columns = ({ deleteIdentity, correctIdentityLocation, translations }: { deleteIdentity: (id: string) => void; correctIdentityLocation: (identity: Identity) => void; translations: any }): ColumnDef<Identity>[] => {
-  const router = useRouter();
-  
-  const handleViewOnWeb = (identity: Identity) => {
-    sessionStorage.setItem('view-identity', JSON.stringify(identity));
-    router.push('/identity/view');
-  };
 
   return [
   {
@@ -60,6 +54,12 @@ export const columns = ({ deleteIdentity, correctIdentityLocation, translations 
     id: "actions",
     cell: ({ row }) => {
       const identity = row.original;
+      const router = useRouter();
+      
+      const handleViewOnWeb = (identityToView: Identity) => {
+        sessionStorage.setItem('view-identity', JSON.stringify(identityToView));
+        router.push('/identity/view');
+      };
 
       return (
         <ActionsMenu
