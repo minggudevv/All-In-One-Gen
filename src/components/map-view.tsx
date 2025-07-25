@@ -21,18 +21,15 @@ const MapView = ({ lat, lon }: { lat: number; lon: number }) => {
 
   useEffect(() => {
     // Pastikan kode ini hanya berjalan di klien dan elemen kontainer sudah ada
-    if (typeof window !== "undefined" && mapContainerRef.current) {
-      
-      // Hanya inisialisasi peta jika belum ada instance
-      if (!mapRef.current) {
+    if (typeof window !== "undefined" && mapContainerRef.current && !mapRef.current) {
         const map = L.map(mapContainerRef.current, {
           center: [lat, lon],
           zoom: 13,
           scrollWheelZoom: false,
         });
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+          attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
         }).addTo(map);
 
         L.marker([lat, lon], { icon: customIcon })
@@ -40,10 +37,7 @@ const MapView = ({ lat, lon }: { lat: number; lon: number }) => {
          .bindPopup("Approximate location.");
 
         mapRef.current = map;
-      } else {
-        // Jika peta sudah ada, cukup perbarui view-nya
-        mapRef.current.setView([lat, lon], 13);
-      }
+      
     }
 
     // Fungsi cleanup untuk menghancurkan instance peta saat komponen dibongkar
