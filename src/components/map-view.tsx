@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Expand } from "lucide-react";
 
-// Definisikan ikon kustom untuk menghindari masalah dengan path gambar
 const customIcon = new L.Icon({
   iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
   iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
@@ -15,45 +17,80 @@ const customIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
-const MapView = ({ lat, lon }: { lat: number; lon: number }) => {
+const MapRenderer = ({ lat, lon, isDialog = false }: { lat: number; lon: number; isDialog?: boolean }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
 
   useEffect(() => {
-    // Pastikan kode ini hanya berjalan di klien dan elemen kontainer sudah ada
-    if (typeof window !== "undefined" && mapContainerRef.current && !mapRef.current) {
-        const map = L.map(mapContainerRef.current, {
-          center: [lat, lon],
-          zoom: 13,
-          scrollWheelZoom: false,
-        });
+    if (mapContainerRef.current && !mapRef.current) {
+      const map = L.map(mapContainerRef.current, {
+        center: [lat, lon],
+        zoom: 13,
+        scrollWheelZoom: false,
+      });
 
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-          attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-        }).addTo(map);
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+      }).addTo(map);
 
-        L.marker([lat, lon], { icon: customIcon })
-         .addTo(map)
-         .bindPopup("Approximate location.");
+      L.marker([lat, lon], { icon: customIcon })
+       .addTo(map)
+       .bindPopup("Approximate location.");
 
-        mapRef.current = map;
-      
+      mapRef.current = map;
+
+      // When the map is in a dialog, it might need to be resized after the dialog opens.
+      if (isDialog) {
+        setTimeout(() => {
+          map.invalidateSize();
+        }, 400); // Delay to allow for dialog animation
+      }
     }
 
-    // Fungsi cleanup untuk menghancurkan instance peta saat komponen dibongkar
     return () => {
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
       }
     };
-  }, [lat, lon]);
+  }, [lat, lon, isDialog]);
 
   return (
-    <div 
-      ref={mapContainerRef} 
-      style={{ height: "200px", width: "100%", borderRadius: "var(--radius)" }}
+    <div
+      ref={mapContainerRef}
+      style={{ height: isDialog ? '80vh' : '200px', width: "100%", borderRadius: "var(--radius)" }}
+      className="z-0"
     />
+  );
+};
+
+
+const MapView = ({ lat, lon }: { lat: number; lon: number }) => {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return <div className="rounded-md overflow-hidden h-48 bg-muted flex items-center justify-center"><p className="text-muted-foreground text-sm">Loading map...</p></div>;
+  }
+
+  return (
+    <div className="relative">
+      <MapRenderer lat={lat} lon={lon} />
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button variant="outline" size="icon" className="absolute top-2 right-2 z-10 bg-background/70 hover:bg-background/90">
+             <Expand className="h-4 w-4" />
+             <span className="sr-only">Besarkan Peta</span>
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-4xl w-full p-2 sm:p-4">
+           <MapRenderer lat={lat} lon={lon} isDialog={true} />
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 
