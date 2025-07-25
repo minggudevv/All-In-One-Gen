@@ -1,0 +1,24 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Aturan ini mengunci seluruh database Anda secara default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Izinkan pengguna yang diautentikasi untuk membaca dan menulis ke dokumen mereka sendiri
+    // di koleksi 'users'. Ini berguna untuk menyimpan informasi profil pengguna.
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Izinkan pengguna yang diautentikasi untuk CRUD (Create, Read, Update, Delete)
+    // dokumen apa pun dalam subkoleksi apa pun di bawah dokumen pengguna mereka sendiri.
+    // Ini mencakup 'identities', 'emails', dan 'passwords'.
+    match /users/{userId}/{collection}/{docId} {
+        allow read, write, delete: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
