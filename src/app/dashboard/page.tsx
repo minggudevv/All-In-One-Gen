@@ -179,7 +179,7 @@ export default function DashboardPage() {
 
         <TabsContent value="identities">
           {identities.length > 0 ? (
-            <DataTable columns={identityColumns({ deleteIdentity, correctIdentityLocation, translations })} data={identities} filterColumn="name" filterPlaceholder={translations.dashboard.filter.name} />
+            <DataTable columns={identityColumns({ deleteIdentity, correctIdentityLocation, translations })} data={identities} filterColumn="name" filterPlaceholder={translations.dashboard.filter.name} noResultsText={translations.dashboard.noResults} />
           ) : (
             <EmptyState 
                 title={translations.dashboard.empty.identities.title}
@@ -190,7 +190,7 @@ export default function DashboardPage() {
         </TabsContent>
         <TabsContent value="emails">
           {emails.length > 0 ? (
-            <DataTable columns={emailColumns({ deleteEmail, translations })} data={emails} filterColumn="email" filterPlaceholder={translations.dashboard.filter.email} />
+            <DataTable columns={emailColumns({ deleteEmail, translations })} data={emails} filterColumn="email" filterPlaceholder={translations.dashboard.filter.email} noResultsText={translations.dashboard.noResults} />
           ) : (
              <EmptyState 
                 title={translations.dashboard.empty.emails.title}
@@ -201,7 +201,7 @@ export default function DashboardPage() {
         </TabsContent>
         <TabsContent value="passwords">
           {passwords.length > 0 ? (
-            <DataTable columns={passwordColumns({ deletePassword, translations })} data={passwords} filterColumn="password" filterPlaceholder={translations.dashboard.filter.password} />
+            <DataTable columns={passwordColumns({ deletePassword, translations })} data={passwords} filterColumn="password" filterPlaceholder={translations.dashboard.filter.password} noResultsText={translations.dashboard.noResults} />
           ) : (
             <EmptyState
                 title={translations.dashboard.empty.passwords.title}

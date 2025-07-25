@@ -86,6 +86,7 @@ const translations = {
   dashboard: {
       title: "Dasbor",
       subtitle: "Kelola identitas, email, dan kata sandi Anda yang tersimpan di sini.",
+      noResults: "Tidak ada hasil.",
       tabs: {
           identities: "Identitas",
           emails: "Email",

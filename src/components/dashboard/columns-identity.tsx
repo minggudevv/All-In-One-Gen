@@ -10,6 +10,11 @@ import { useRouter } from "next/navigation";
 export const columns = ({ deleteIdentity, correctIdentityLocation, translations }: { deleteIdentity: (id: string) => void; correctIdentityLocation: (identity: Identity) => void; translations: any }): ColumnDef<Identity>[] => {
   const router = useRouter();
   
+  const handleViewOnWeb = (identity: Identity) => {
+    sessionStorage.setItem('view-identity', JSON.stringify(identity));
+    router.push('/identity/view');
+  };
+
   return [
   {
     accessorKey: "picture",
@@ -55,16 +60,11 @@ export const columns = ({ deleteIdentity, correctIdentityLocation, translations 
     id: "actions",
     cell: ({ row }) => {
       const identity = row.original;
-      
-      const handleViewOnWeb = () => {
-        sessionStorage.setItem('view-identity', JSON.stringify(identity));
-        router.push('/identity/view');
-      };
 
       return (
         <ActionsMenu
           onDelete={() => deleteIdentity(identity.id!)}
-          onView={handleViewOnWeb}
+          onView={() => handleViewOnWeb(identity)}
           onCorrectLocation={() => correctIdentityLocation(identity)}
           copyItems={[
             { label: translations.dashboard.actions.copyJson, value: JSON.stringify(identity, null, 2) },

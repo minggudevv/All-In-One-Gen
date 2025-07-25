@@ -86,6 +86,7 @@ const translations = {
   dashboard: {
       title: "Dashboard",
       subtitle: "Manage your saved identities, emails, and passwords here.",
+      noResults: "No results.",
       tabs: {
           identities: "Identities",
           emails: "Emails",
