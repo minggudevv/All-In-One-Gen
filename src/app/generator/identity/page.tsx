@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
@@ -12,7 +13,6 @@ import { enhanceIdentity } from "@/ai/flows/enhance-identity-generation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
 import {
   User,
   Mail,
@@ -22,7 +22,8 @@ import {
   RefreshCw,
   Save,
   LogIn,
-  Sparkles
+  Sparkles,
+  Eye
 } from "lucide-react";
 import Link from "next/link";
 
@@ -35,6 +36,7 @@ export default function IdentityGeneratorPage() {
 
   const { user } = useAuth();
   const { toast } = useToast();
+  const router = useRouter();
 
   const fetchIdentity = useCallback(async () => {
     setLoading(true);
@@ -109,6 +111,13 @@ export default function IdentityGeneratorPage() {
       });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleViewOnWeb = () => {
+    if (identity) {
+      sessionStorage.setItem('view-identity', JSON.stringify(identity));
+      window.open('/identity/view', '_blank');
     }
   };
 
@@ -205,10 +214,16 @@ export default function IdentityGeneratorPage() {
           </div>
         )}
         <CardFooter className="bg-muted/50 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <Button onClick={fetchIdentity} disabled={loading} size="lg" className="w-full sm:w-auto">
-            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            {loading ? "Generating..." : "Generate Again"}
-          </Button>
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                 <Button onClick={fetchIdentity} disabled={loading} size="lg" className="w-full sm:w-auto">
+                    <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                    {loading ? "Generating..." : "Generate Again"}
+                </Button>
+                <Button onClick={handleViewOnWeb} disabled={loading} size="lg" variant="secondary" className="w-full sm:w-auto">
+                    <Eye className="mr-2 h-4 w-4" />
+                    View on Web
+                </Button>
+            </div>
           {user ? (
             <Button onClick={handleSaveIdentity} disabled={isSaving || loading} size="lg" variant="outline" className="w-full sm:w-auto">
               <Save className={`mr-2 h-4 w-4 ${isSaving ? 'animate-pulse' : ''}`} />
