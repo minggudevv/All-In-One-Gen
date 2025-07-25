@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, RefreshCw, Check, Save, LogIn } from "lucide-react";
+import { Copy, RefreshCw, Check, Save } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
@@ -95,7 +95,7 @@ export default function EmailGeneratorPage() {
                 <div className="flex items-center gap-1">
                   {user && (
                     <Button variant="ghost" size="icon" onClick={() => handleSaveEmail(email)} disabled={isSaving === email}>
-                      {isSaving === email ? <Save className="h-5 w-5 animate-pulse" /> : <Save className="h-5 w-5" />}
+                      <Save className={`h-5 w-5 ${isSaving === email ? 'animate-spin' : ''}`} />
                        <span className="sr-only">Save email</span>
                     </Button>
                   )}
@@ -123,3 +123,5 @@ export default function EmailGeneratorPage() {
     </div>
   );
 }
+
+    

@@ -37,6 +37,11 @@ export default function PasswordGeneratorPage() {
     if (includeNumbers) charPool += numberChars;
     if (includeSymbols) charPool += symbolChars;
 
+    if (charPool.length === 0) {
+      setPassword("");
+      return;
+    }
+
     let newPassword = "";
     for (let i = 0; i < length; i++) {
       const randomIndex = Math.floor(Math.random() * charPool.length);
@@ -198,7 +203,7 @@ export default function PasswordGeneratorPage() {
           </Button>
           {user ? (
              <Button onClick={handleSavePassword} disabled={isSaving} size="lg" variant="outline" className="w-full">
-                <Save className={`mr-2 h-4 w-4 ${isSaving ? 'animate-pulse' : ''}`} />
+                <Save className={`mr-2 h-4 w-4 ${isSaving ? 'animate-spin' : ''}`} />
                 {isSaving ? "Saving..." : "Save to Dashboard"}
              </Button>
           ) : (
@@ -214,3 +219,5 @@ export default function PasswordGeneratorPage() {
     </div>
   );
 }
+
+    

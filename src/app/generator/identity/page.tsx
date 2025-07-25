@@ -317,7 +317,7 @@ export default function IdentityGeneratorPage() {
             </div>
           {user ? (
             <Button onClick={handleSaveIdentity} disabled={isSaving || loading || !identity} size="lg" variant="outline" className="w-full sm:w-auto">
-              <Save className={`mr-2 h-4 w-4 ${isSaving ? 'animate-pulse' : ''}`} />
+              <Save className={`mr-2 h-4 w-4 ${isSaving ? 'animate-spin' : ''}`} />
               {isSaving ? "Saving..." : "Save to Dashboard"}
             </Button>
           ) : (
@@ -334,5 +334,7 @@ export default function IdentityGeneratorPage() {
   );
 }
 
+
+    
 
     

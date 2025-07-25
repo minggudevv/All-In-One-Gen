@@ -17,7 +17,7 @@ import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { correctLocation } from "@/ai/flows/correct-location-flow";
+import { correctLocation as correctLocationFlow } from "@/ai/flows/correct-location-flow";
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
@@ -86,7 +86,7 @@ export default function DashboardPage() {
     
     try {
         const fullAddress = `${identity.location.street.number} ${identity.location.street.name}, ${identity.location.city}, ${identity.location.state} ${identity.location.postcode}, ${identity.location.country}`;
-        const result = await correctLocation({ address: fullAddress });
+        const result = await correctLocationFlow({ address: fullAddress });
 
         const identityRef = doc(db, `users/${user.uid}/identities`, identity.id);
         await updateDoc(identityRef, {
@@ -216,3 +216,5 @@ const EmptyState = ({title, description, cta, href}: {title: string, description
         </CardContent>
     </Card>
 )
+
+    
