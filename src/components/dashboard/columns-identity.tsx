@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Identity } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ActionsMenu } from "./actions-menu";
+import { useRouter } from "next/navigation";
 
 
 export const columns = ({ deleteIdentity, correctIdentityLocation }: { deleteIdentity: (id: string) => void; correctIdentityLocation: (identity: Identity) => void; }): ColumnDef<Identity>[] => [
@@ -51,10 +52,11 @@ export const columns = ({ deleteIdentity, correctIdentityLocation }: { deleteIde
     id: "actions",
     cell: ({ row }) => {
       const identity = row.original;
+      const router = useRouter();
       
       const handleViewOnWeb = () => {
         sessionStorage.setItem('view-identity', JSON.stringify(identity));
-        window.open('/identity/view', '_blank');
+        router.push('/identity/view');
       };
 
       return (
