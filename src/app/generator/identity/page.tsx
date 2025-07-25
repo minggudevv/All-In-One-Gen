@@ -27,6 +27,8 @@ import {
   LogIn,
   Sparkles,
   Compass,
+  Copy,
+  Check,
 } from "lucide-react";
 import Link from "next/link";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -36,18 +38,6 @@ const MapView = dynamic(() => import("@/components/map-view"), {
   loading: () => <div className="rounded-md overflow-hidden h-48 bg-muted flex items-center justify-center"><p className="text-muted-foreground text-sm">Loading map...</p></div>
 });
 
-const isLand = (lat: number, lon: number) => {
-    // A simple bounding box for the continental US to filter out obvious ocean coordinates.
-    // This is not perfect but will prevent most "in the ocean" results.
-    const usBounds = {
-        north: 49.38,
-        south: 24.39,
-        west: -125.0,
-        east: -66.94,
-    };
-    return lat >= usBounds.south && lat <= usBounds.north && lon >= usBounds.west && lon <= usBounds.east;
-}
-
 export default function IdentityGeneratorPage() {
   const [identity, setIdentity] = useState<Identity | null>(null);
   const [loading, setLoading] = useState(true);
@@ -55,17 +45,25 @@ export default function IdentityGeneratorPage() {
   const [backstory, setBackstory] = useState<string | null>(null);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isCorrectingMap, setIsCorrectingMap] = useState(false);
-  const [displayedBackstory, setDisplayedBackstory] = useState("");
-
+  const [isBackstoryCopied, setIsBackstoryCopied] = useState(false);
 
   const { user } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
 
+  const isLand = (lat: number, lon: number) => {
+    const usBounds = {
+        north: 49.38,
+        south: 24.39,
+        west: -125.0,
+        east: -66.94,
+    };
+    return lat >= usBounds.south && lat <= usBounds.north && lon >= usBounds.west && lon <= usBounds.east;
+  }
+
   const fetchIdentity = useCallback(async (retryCount = 0) => {
     setLoading(true);
     setBackstory(null);
-    setDisplayedBackstory("");
   
     try {
       const response = await fetch("https://randomuser.me/api/?nat=us");
@@ -78,10 +76,9 @@ export default function IdentityGeneratorPage() {
       const lat = parseFloat(result.location.coordinates.latitude);
       const lon = parseFloat(result.location.coordinates.longitude);
   
-      // If the location is in the ocean, and we haven't retried too many times, try again.
       if (!isLand(lat, lon) && retryCount < 5) {
-        fetchIdentity(retryCount + 1); // Recursive call with incremented counter
-        return; // Important: exit the current function call
+        fetchIdentity(retryCount + 1);
+        return; 
       }
   
       const newIdentity: Identity = {
@@ -104,7 +101,7 @@ export default function IdentityGeneratorPage() {
   
     } catch (error) {
       console.error("Failed to fetch identity:", error);
-      setIdentity(null); // Clear any old identity data
+      setIdentity(null); 
       toast({
         variant: "destructive",
         title: "Error Fetching Identity",
@@ -122,7 +119,6 @@ export default function IdentityGeneratorPage() {
   const generateBackstory = async () => {
     if (!identity) return;
     setIsEnhancing(true);
-    setDisplayedBackstory("");
     setBackstory(null);
     try {
       const result = await enhanceIdentity(identity);
@@ -140,19 +136,16 @@ export default function IdentityGeneratorPage() {
     }
   };
 
-  useEffect(() => {
-    if (backstory) {
-      let i = 0;
-      const interval = setInterval(() => {
-        setDisplayedBackstory(backstory.slice(0, i + 1));
-        i++;
-        if (i >= backstory.length) {
-          clearInterval(interval);
-        }
-      }, 20); // Adjust typing speed here (milliseconds)
-      return () => clearInterval(interval);
-    }
-  }, [backstory]);
+  const handleCopyBackstory = () => {
+    if (!backstory) return;
+    navigator.clipboard.writeText(backstory);
+    setIsBackstoryCopied(true);
+    toast({
+      title: "Copied!",
+      description: "Backstory has been copied to your clipboard.",
+    });
+    setTimeout(() => setIsBackstoryCopied(false), 2000);
+  };
 
 
   const handleCorrectMap = async () => {
@@ -308,11 +301,23 @@ export default function IdentityGeneratorPage() {
                             <Skeleton className="h-4 w-5/6" />
                         </div>
                       ) : backstory ? (
-                        <p className="text-md italic">"{displayedBackstory}"</p>
+                        <div className="relative">
+                            <p className="text-md italic pr-10">"{backstory}"</p>
+                            <Button variant="ghost" size="icon" className="absolute -top-1 right-0" onClick={handleCopyBackstory}>
+                                {isBackstoryCopied ? (
+                                    <Check className="h-5 w-5 text-green-500" />
+                                ) : (
+                                    <Copy className="h-5 w-5" />
+                                )}
+                                <span className="sr-only">Copy backstory</span>
+                            </Button>
+                        </div>
                       ) : (
                         <div>
                           {user ? (
-                            <Button variant="link" className="p-0 h-auto" onClick={generateBackstory}>Generate Backstory</Button>
+                            <Button variant="link" className="p-0 h-auto" onClick={generateBackstory} disabled={isEnhancing}>
+                                {isEnhancing ? 'Generating...' : 'Generate Backstory'}
+                            </Button>
                           ) : (
                             <p className="text-sm text-muted-foreground">
                               <Link href="/login" className="underline">Log in</Link> to generate a backstory.
@@ -351,8 +356,3 @@ export default function IdentityGeneratorPage() {
     </div>
   );
 }
-
-
-    
-
-    
