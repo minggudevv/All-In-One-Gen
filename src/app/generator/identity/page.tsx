@@ -32,6 +32,18 @@ const MapView = dynamic(() => import("@/components/map-view"), {
   loading: () => <div className="rounded-md overflow-hidden h-48 bg-muted flex items-center justify-center mt-4"><p className="text-muted-foreground text-sm">Loading map...</p></div>
 });
 
+const isLand = (lat: number, lon: number) => {
+    // A simple bounding box for the continental US to filter out obvious ocean coordinates.
+    // This is not perfect but will prevent most "in the ocean" results.
+    const usBounds = {
+        north: 49.38,
+        south: 24.39,
+        west: -125.0,
+        east: -66.94,
+    };
+    return lat >= usBounds.south && lat <= usBounds.north && lon >= usBounds.west && lon <= usBounds.east;
+}
+
 export default function IdentityGeneratorPage() {
   const [identity, setIdentity] = useState<Identity | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,29 +58,42 @@ export default function IdentityGeneratorPage() {
   const fetchIdentity = useCallback(async () => {
     setLoading(true);
     setBackstory(null);
-    try {
-      const response = await fetch("https://randomuser.me/api/?nat=us");
-      const data = await response.json();
-      const result = data.results[0];
-      const newIdentity: Identity = {
-        name: result.name,
-        email: result.email,
-        location: result.location,
-        phone: result.phone,
-        dob: result.dob,
-        picture: result.picture,
-      };
-      setIdentity(newIdentity);
-    } catch (error) {
-      console.error("Failed to fetch identity:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to fetch a new identity. Please try again.",
-      });
-    } finally {
-      setLoading(false);
+    let validIdentity = false;
+
+    while(!validIdentity) {
+      try {
+        const response = await fetch("https://randomuser.me/api/?nat=us");
+        const data = await response.json();
+        const result = data.results[0];
+        
+        const lat = parseFloat(result.location.coordinates.latitude);
+        const lon = parseFloat(result.location.coordinates.longitude);
+
+        if (isLand(lat, lon)) {
+            const newIdentity: Identity = {
+                name: result.name,
+                email: result.email,
+                location: result.location,
+                phone: result.phone,
+                dob: result.dob,
+                picture: result.picture,
+            };
+            setIdentity(newIdentity);
+            validIdentity = true;
+        }
+      } catch (error) {
+        console.error("Failed to fetch identity:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch a new identity. Please try again.",
+        });
+        // Stop the loop if there's a network error
+        break; 
+      }
     }
+    
+    setLoading(false);
   }, [toast]);
 
   useEffect(() => {
