@@ -5,35 +5,43 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Zap } from "lucide-react";
+import { Menu, Zap, Globe } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/use-language";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Header() {
   const { user, logout } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  const { language, setLanguage, translations } = useLanguage();
 
   const handleLogout = async () => {
     try {
       await logout();
       toast({
-        title: "Logged out",
-        description: "You have been successfully logged out.",
+        title: translations.toasts.logoutSuccess.title,
+        description: translations.toasts.logoutSuccess.description,
       });
       router.push("/");
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Logout Failed",
-        description: "An error occurred while logging out.",
+        title: translations.toasts.logoutFailed.title,
+        description: translations.toasts.logoutFailed.description,
       });
     }
   };
 
   const navLinks = [
-    { href: "/generator/identity", label: "Identity" },
-    { href: "/generator/email", label: "Email" },
-    { href: "/generator/password", label: "Password" },
+    { href: "/generator/identity", label: translations.header.identity },
+    { href: "/generator/email", label: translations.header.email },
+    { href: "/generator/password", label: translations.header.password },
   ];
 
   return (
@@ -55,21 +63,38 @@ export default function Header() {
           </nav>
         </div>
 
-        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
+        <div className="flex flex-1 items-center justify-end space-x-2">
+           <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Globe className="h-5 w-5" />
+                <span className="sr-only">Change language</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setLanguage("en")} disabled={language === "en"}>
+                English
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setLanguage("id")} disabled={language === "id"}>
+                Indonesia
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           {user ? (
             <>
               <Button asChild variant="ghost">
-                <Link href="/dashboard">Dashboard</Link>
+                <Link href="/dashboard">{translations.header.dashboard}</Link>
               </Button>
-              <Button onClick={handleLogout}>Logout</Button>
+              <Button onClick={handleLogout}>{translations.header.logout}</Button>
             </>
           ) : (
             <>
               <Button asChild variant="ghost">
-                <Link href="/login">Log In</Link>
+                <Link href="/login">{translations.header.login}</Link>
               </Button>
               <Button asChild>
-                <Link href="/signup">Sign Up</Link>
+                <Link href="/signup">{translations.header.signup}</Link>
               </Button>
             </>
           )}
@@ -96,7 +121,6 @@ export default function Header() {
             </div>
           </SheetContent>
         </Sheet>
-
       </div>
     </header>
   );
