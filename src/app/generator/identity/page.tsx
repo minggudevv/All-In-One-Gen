@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -59,49 +60,56 @@ export default function IdentityGeneratorPage() {
   const { toast } = useToast();
   const router = useRouter();
 
-  const fetchIdentity = useCallback(async () => {
+  const fetchIdentity = useCallback(async (retryCount = 0) => {
     setLoading(true);
     setBackstory(null);
-    let validIdentity = false;
-
-    while(!validIdentity) {
-      try {
-        const response = await fetch("https://randomuser.me/api/?nat=us");
-        if (!response.ok) {
-            // Handle HTTP errors like 404 or 500
-            throw new Error(`Network response was not ok: ${response.statusText}`);
-        }
-        const data = await response.json();
-        const result = data.results[0];
-        
-        const lat = parseFloat(result.location.coordinates.latitude);
-        const lon = parseFloat(result.location.coordinates.longitude);
-
-        if (isLand(lat, lon)) {
-            const newIdentity: Identity = {
-                name: result.name,
-                email: result.email,
-                location: result.location,
-                phone: result.phone,
-                dob: result.dob,
-                picture: result.picture,
-            };
-            setIdentity(newIdentity);
-            validIdentity = true;
-        }
-      } catch (error) {
-        console.error("Failed to fetch identity:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to fetch a new identity. Please try again.",
-        });
-        // Stop the loop if there's a network error
-        break; 
+  
+    try {
+      const response = await fetch("https://randomuser.me/api/?nat=us");
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.statusText}`);
       }
+      const data = await response.json();
+      const result = data.results[0];
+  
+      const lat = parseFloat(result.location.coordinates.latitude);
+      const lon = parseFloat(result.location.coordinates.longitude);
+  
+      // If the location is in the ocean, and we haven't retried too many times, try again.
+      if (!isLand(lat, lon) && retryCount < 5) {
+        fetchIdentity(retryCount + 1); // Recursive call with incremented counter
+        return; // Important: exit the current function call
+      }
+  
+      const newIdentity: Identity = {
+        name: result.name,
+        email: result.email,
+        location: result.location,
+        phone: result.phone,
+        dob: result.dob,
+        picture: result.picture,
+      };
+      setIdentity(newIdentity);
+  
+      if (!isLand(lat, lon)) {
+        toast({
+            variant: "destructive",
+            title: "Could not find a land-based location",
+            description: "The generated identity is located in the water. You can try correcting it with AI.",
+          });
+      }
+  
+    } catch (error) {
+      console.error("Failed to fetch identity:", error);
+      setIdentity(null); // Clear any old identity data
+      toast({
+        variant: "destructive",
+        title: "Error Fetching Identity",
+        description: "Could not retrieve a new identity. Please check your connection and try again.",
+      });
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   }, [toast]);
 
   useEffect(() => {
@@ -302,18 +310,18 @@ export default function IdentityGeneratorPage() {
         )}
         <CardFooter className="bg-muted/50 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                 <Button onClick={fetchIdentity} disabled={loading} size="lg" className="w-full sm:w-auto">
+                 <Button onClick={() => fetchIdentity()} disabled={loading} size="lg" className="w-full sm:w-auto">
                     <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                     {loading ? "Generating..." : "Generate Again"}
                 </Button>
             </div>
           {user ? (
-            <Button onClick={handleSaveIdentity} disabled={isSaving || loading} size="lg" variant="outline" className="w-full sm:w-auto">
+            <Button onClick={handleSaveIdentity} disabled={isSaving || loading || !identity} size="lg" variant="outline" className="w-full sm:w-auto">
               <Save className={`mr-2 h-4 w-4 ${isSaving ? 'animate-pulse' : ''}`} />
               {isSaving ? "Saving..." : "Save to Dashboard"}
             </Button>
           ) : (
-             <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
+             <Button asChild size="lg" variant="outline" className="w-full sm:w-auto" disabled={!identity}>
                 <Link href="/login">
                   <LogIn className="mr-2 h-4 w-4" />
                   Log in to Save
@@ -325,3 +333,6 @@ export default function IdentityGeneratorPage() {
     </div>
   );
 }
+
+
+    
