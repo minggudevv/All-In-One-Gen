@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/use-auth";
 import Link from "next/link";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { useLanguage } from "@/hooks/use-language";
 
 export default function PasswordGeneratorPage() {
   const [password, setPassword] = useState("");
@@ -24,7 +25,7 @@ export default function PasswordGeneratorPage() {
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
-
+  const { translations } = useLanguage();
 
   const generatePassword = useCallback(() => {
     const lowerCaseChars = "abcdefghijklmnopqrstuvwxyz";
@@ -43,10 +44,14 @@ export default function PasswordGeneratorPage() {
     }
 
     let newPassword = "";
+    const randomValues = new Uint32Array(length);
+    window.crypto.getRandomValues(randomValues);
+
     for (let i = 0; i < length; i++) {
-      const randomIndex = Math.floor(Math.random() * charPool.length);
-      newPassword += charPool[randomIndex];
+        const randomIndex = randomValues[i] % charPool.length;
+        newPassword += charPool[randomIndex];
     }
+
     setPassword(newPassword);
     setIsCopied(false);
   }, [length, includeUppercase, includeNumbers, includeSymbols]);
@@ -219,5 +224,3 @@ export default function PasswordGeneratorPage() {
     </div>
   );
 }
-
-    
