@@ -22,12 +22,6 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/api/portraits/**',
       },
-      {
-        protocol: 'https',
-        hostname: 'cdnjs.cloudflare.com',
-        port: '',
-        pathname: '/**',
-      }
     ],
   },
 };

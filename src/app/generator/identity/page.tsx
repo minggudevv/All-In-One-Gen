@@ -261,6 +261,7 @@ export default function IdentityGeneratorPage() {
                 height={160}
                 className="rounded-full border-4 border-background shadow-md mb-4"
                 data-ai-hint="profile picture"
+                priority
               />
               <h2 className="text-2xl font-bold font-headline">{`${identity.name.first} ${identity.name.last}`}</h2>
               <p className="text-muted-foreground">{`@${identity.name.first.toLowerCase()}${identity.name.last.toLowerCase()}`}</p>
