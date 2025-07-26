@@ -46,6 +46,7 @@ import {
   EyeOff,
   Trash2,
   Copy,
+  KeyRound,
 } from "lucide-react";
 import {
   Table,
@@ -65,7 +66,8 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-  } from "@/components/ui/alert-dialog"
+  } from "@/components/ui/alert-dialog";
+import { Separator } from "@/components/ui/separator";
 
 const formSchema = z.object({
   service: z.string().min(2, "Service name is required."),
@@ -189,59 +191,63 @@ export default function CredentialsPage() {
 
   return (
     <div className="w-full">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle>Add New Credential</CardTitle>
-              <CardDescription>
-                Your password will be encrypted before it's saved.
-              </CardDescription>
+      <div className="flex justify-center">
+        <Card className="w-full max-w-4xl shadow-lg">
+            <CardHeader className="text-center">
+                <div className="mx-auto bg-primary/10 rounded-full p-3 w-fit">
+                    <KeyRound className="h-8 w-8 text-primary" />
+                </div>
+                <CardTitle className="mt-2">Add New Credential</CardTitle>
+                <CardDescription>
+                    Your password will be encrypted before it's saved.
+                </CardDescription>
             </CardHeader>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <CardContent className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="service"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Service Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., Google, GitHub" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email or Username</FormLabel>
-                        <FormControl>
-                          <Input placeholder="name@example.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <Input type="password" placeholder="••••••••" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+                <CardContent className="px-4 md:px-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        <FormField
+                            control={form.control}
+                            name="service"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Service Name</FormLabel>
+                                <FormControl>
+                                <Input placeholder="e.g., Google, GitHub" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Email or Username</FormLabel>
+                                <FormControl>
+                                <Input placeholder="name@example.com" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="password"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Password</FormLabel>
+                                <FormControl>
+                                <Input type="password" placeholder="••••••••" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                     </div>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="px-4 md:px-6">
                   <Button type="submit" className="w-full" disabled={isSubmitting}>
                      <PlusCircle className="mr-2 h-4 w-4" />
                     {isSubmitting ? 'Saving...' : 'Save Securely'}
@@ -249,16 +255,15 @@ export default function CredentialsPage() {
                 </CardFooter>
               </form>
             </Form>
-          </Card>
-        </div>
 
-        <div className="lg:col-span-2">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Saved Credentials</CardTitle>
-                    <CardDescription>You have {credentials.length} credential(s) saved.</CardDescription>
-                </CardHeader>
-                <CardContent>
+            <Separator className="my-6"/>
+
+            <CardHeader>
+                <CardTitle>Saved Credentials</CardTitle>
+                <CardDescription>You have {credentials.length} credential(s) saved.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="overflow-x-auto">
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -282,10 +287,10 @@ export default function CredentialsPage() {
                                         {decryptedPasswords[cred.id!] ? decryptedPasswords[cred.id!] : '••••••••••••'}
                                     </TableCell>
                                     <TableCell className="text-right">
-                                         <AlertDialog>
+                                        <AlertDialog>
                                             <div className="flex justify-end items-center gap-1">
                                                 {decryptedPasswords[cred.id!] && (
-                                                     <Button variant="ghost" size="icon" onClick={() => copyToClipboard(decryptedPasswords[cred.id!])}>
+                                                    <Button variant="ghost" size="icon" onClick={() => copyToClipboard(decryptedPasswords[cred.id!])}>
                                                         <Copy className="h-4 w-4"/>
                                                         <span className="sr-only">Copy Password</span>
                                                     </Button>
@@ -301,7 +306,7 @@ export default function CredentialsPage() {
                                                     </Button>
                                                 </AlertDialogTrigger>
                                             </div>
-                                             <AlertDialogContent>
+                                            <AlertDialogContent>
                                                 <AlertDialogHeader>
                                                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                                 <AlertDialogDescription>
@@ -326,10 +331,12 @@ export default function CredentialsPage() {
                             )}
                         </TableBody>
                     </Table>
-                </CardContent>
-            </Card>
-        </div>
+                </div>
+            </CardContent>
+        </Card>
       </div>
     </div>
   );
 }
+
+    
