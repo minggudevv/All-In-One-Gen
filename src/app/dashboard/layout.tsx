@@ -18,10 +18,6 @@ import {
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard,
-  KeyRound,
-  User,
-  Mail,
-  Lock,
   ShieldCheck,
 } from "lucide-react";
 
