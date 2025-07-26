@@ -1,9 +1,7 @@
-
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
@@ -12,6 +10,7 @@ import type { Identity } from "@/types";
 import { enhanceIdentity } from "@/ai/flows/enhance-identity-generation";
 import { correctLocation } from "@/ai/flows/correct-location-flow";
 import dynamic from "next/dynamic";
+import { useLanguage } from "@/hooks/use-language";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -70,7 +69,7 @@ export default function IdentityGeneratorPage() {
 
   const { user } = useAuth();
   const { toast } = useToast();
-  const router = useRouter();
+  const { translations } = useLanguage();
 
   const isLand = (lat: number, lon: number) => {
     const usBounds = {
@@ -115,8 +114,8 @@ export default function IdentityGeneratorPage() {
       if (!isLand(lat, lon)) {
         toast({
             variant: "destructive",
-            title: "Could not find a land-based location",
-            description: "The generated identity is located in the water. You can try correcting it with AI.",
+            title: translations.toasts.identity.locationErrorTitle,
+            description: translations.toasts.identity.locationErrorDesc,
           });
       }
   
@@ -125,13 +124,13 @@ export default function IdentityGeneratorPage() {
       setIdentity(null); 
       toast({
         variant: "destructive",
-        title: "Error Fetching Identity",
-        description: "Could not retrieve a new identity. Please check your connection and try again.",
+        title: translations.toasts.identity.fetchErrorTitle,
+        description: translations.toasts.identity.fetchErrorDesc,
       });
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, translations]);
 
   useEffect(() => {
     fetchIdentity();
@@ -160,8 +159,8 @@ export default function IdentityGeneratorPage() {
       console.error("Failed to enhance identity:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to generate backstory."
+        title: translations.toasts.error,
+        description: translations.toasts.identity.backstoryError,
       });
       setBackstory("Could not generate a backstory.");
     } finally {
@@ -174,8 +173,8 @@ export default function IdentityGeneratorPage() {
     navigator.clipboard.writeText(backstory);
     setIsBackstoryCopied(true);
     toast({
-      title: "Copied!",
-      description: "Backstory has been copied to your clipboard.",
+      title: translations.toasts.copied,
+      description: translations.toasts.identity.backstoryCopied,
     });
     setTimeout(() => setIsBackstoryCopied(false), 2000);
   };
@@ -215,16 +214,16 @@ export default function IdentityGeneratorPage() {
         });
 
         toast({
-            title: "Success!",
-            description: "Map location has been corrected by AI.",
+            title: translations.toasts.success,
+            description: translations.toasts.identity.correctLocationSuccess,
         });
 
     } catch (error) {
         console.error("Failed to correct location:", error);
         toast({
             variant: "destructive",
-            title: "Error",
-            description: "Failed to correct map location.",
+            title: translations.toasts.error,
+            description: translations.toasts.identity.correctLocationError,
         });
     } finally {
         setIsCorrectingMap(false);
@@ -241,15 +240,15 @@ export default function IdentityGeneratorPage() {
         createdAt: serverTimestamp(),
       });
       toast({
-        title: "Success!",
-        description: "Identity saved to your dashboard.",
+        title: translations.toasts.success,
+        description: translations.toasts.identity.saveSuccess,
       });
     } catch (error) {
       console.error("Failed to save identity:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to save identity. Please try again.",
+        title: translations.toasts.error,
+        description: translations.toasts.identity.saveError,
       });
     } finally {
       setIsSaving(false);
@@ -276,9 +275,9 @@ export default function IdentityGeneratorPage() {
             description={loginPromptContent.description}
         />
       <div className="text-center mb-12">
-        <h1 className="font-headline text-4xl font-bold tracking-tight lg:text-5xl">Fake Identity Generator</h1>
+        <h1 className="font-headline text-4xl font-bold tracking-tight lg:text-5xl">{translations.identity.title}</h1>
         <p className="mt-4 text-lg text-muted-foreground">
-          Generate a complete, random identity with a single click.
+          {translations.identity.subtitle}
         </p>
       </div>
 
@@ -319,28 +318,41 @@ export default function IdentityGeneratorPage() {
             </div>
             
             <div className="md:col-span-2 p-8">
-              <CardTitle className="mb-6 font-headline">Details</CardTitle>
+              <CardTitle className="mb-6 font-headline">{translations.identity.details.title}</CardTitle>
               <div className="space-y-6">
-                <IdentityInfoRow icon={<User className="h-5 w-5" />} label="Full Name" value={`${identity.name.title}. ${identity.name.first} ${identity.name.last}`} />
-                <IdentityInfoRow icon={<Mail className="h-5 w-5" />} label="Email Address" value={identity.email} />
-                <IdentityInfoRow icon={<Phone className="h-5 w-5" />} label="Phone Number" value={identity.phone} />
-                <IdentityInfoRow icon={<MapPin className="h-5 w-5" />} label="Address" value={`${identity.location.street.number} ${identity.location.street.name}, ${identity.location.city}, ${identity.location.state} ${identity.location.postcode}`}>
+                <IdentityInfoRow icon={<User className="h-5 w-5" />} label={translations.identity.details.fullName} value={`${identity.name.title}. ${identity.name.first} ${identity.name.last}`} />
+                <IdentityInfoRow icon={<Mail className="h-5 w-5" />} label={translations.identity.details.email} value={identity.email} />
+                <IdentityInfoRow icon={<Phone className="h-5 w-5" />} label={translations.identity.details.phone} value={identity.phone} />
+                <IdentityInfoRow icon={<MapPin className="h-5 w-5" />} label={translations.identity.details.address} value={`${identity.location.street.number} ${identity.location.street.name}, ${identity.location.city}, ${identity.location.state} ${identity.location.postcode}`}>
                    <div className="pt-2">
                        <MapView 
                           lat={parseFloat(identity.location.coordinates.latitude)}
                           lon={parseFloat(identity.location.coordinates.longitude)}
+                          translations={translations}
                         />
+
                          <Button variant="outline" size="sm" className="mt-2" onClick={handleCorrectMap} disabled={isCorrectingMap}>
                             <Compass className={`mr-2 h-4 w-4 ${isCorrectingMap ? 'animate-spin' : ''}`} />
                             {isCorrectingMap ? "Correcting..." : "Correct Map Location"}
                         </Button>
+=======
+                        {user ? (
+                             <Button variant="outline" size="sm" className="mt-2" onClick={handleCorrectMap} disabled={isCorrectingMap}>
+                                <Compass className={`mr-2 h-4 w-4 ${isCorrectingMap ? 'animate-spin' : ''}`} />
+                                {isCorrectingMap ? translations.identity.buttons.correctingMap : translations.identity.buttons.correctMap}
+                            </Button>
+                        ) : (
+                            <p className="text-xs text-muted-foreground mt-2">
+                                <Link href="/login" className="underline">{translations.identity.loginPrompt.login}</Link> {translations.identity.loginPrompt.map}
+                            </p>
+                        )}
                    </div>
                 </IdentityInfoRow>
-                <IdentityInfoRow icon={<Cake className="h-5 w-5" />} label="Date of Birth" value={`${new Date(identity.dob.date).toLocaleDateString()} (Age ${identity.dob.age})`} />
+                <IdentityInfoRow icon={<Cake className="h-5 w-5" />} label={translations.identity.details.dob} value={`${new Date(identity.dob.date).toLocaleDateString()} (Age ${identity.dob.age})`} />
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0 text-muted-foreground"><Sparkles className="h-5 w-5 text-primary" /></div>
                    <div>
-                      <p className="text-sm font-semibold text-muted-foreground">AI Generated Backstory</p>
+                      <p className="text-sm font-semibold text-muted-foreground">{translations.identity.details.backstory}</p>
                       {isEnhancing ? (
                         <div className="space-y-2 pt-1">
                             <Skeleton className="h-4 w-full" />
@@ -355,14 +367,25 @@ export default function IdentityGeneratorPage() {
                                 ) : (
                                     <Copy className="h-5 w-5" />
                                 )}
-                                <span className="sr-only">Copy backstory</span>
+                                <span className="sr-only">{translations.identity.buttons.copyBackstory}</span>
                             </Button>
                         </div>
                       ) : (
                         <div>
+
                             <Button variant="link" className="p-0 h-auto" onClick={handleGenerateBackstory} disabled={isEnhancing}>
                                 {isEnhancing ? 'Generating...' : 'Generate Backstory'}
                             </Button>
+=======
+                          {user ? (
+                            <Button variant="link" className="p-0 h-auto" onClick={generateBackstory} disabled={isEnhancing}>
+                                {isEnhancing ? translations.identity.buttons.generating : translations.identity.buttons.generate}
+                            </Button>
+                          ) : (
+                            <p className="text-sm text-muted-foreground">
+                              <Link href="/login" className="underline">{translations.identity.loginPrompt.login}</Link> {translations.identity.loginPrompt.backstory}
+                            </p>
+                          )}
                         </div>
                       )}
                     </div>
@@ -375,19 +398,19 @@ export default function IdentityGeneratorPage() {
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                  <Button onClick={() => fetchIdentity()} disabled={loading} size="lg" className="w-full sm:w-auto">
                     <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                    {loading ? "Generating..." : "Generate Again"}
+                    {loading ? translations.identity.buttons.generating : translations.identity.buttons.generateAgain}
                 </Button>
             </div>
           {user ? (
             <Button onClick={handleSaveIdentity} disabled={isSaving || loading || !identity} size="lg" variant="outline" className="w-full sm:w-auto">
               <Save className={`mr-2 h-4 w-4 ${isSaving ? 'animate-spin' : ''}`} />
-              {isSaving ? "Saving..." : "Save to Dashboard"}
+              {isSaving ? translations.identity.buttons.saving : translations.identity.buttons.save}
             </Button>
           ) : (
              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto" disabled={!identity}>
                 <Link href="/login">
                   <LogIn className="mr-2 h-4 w-4" />
-                  Log in to Save
+                  {translations.identity.buttons.loginToSave}
                 </Link>
              </Button>
           )}

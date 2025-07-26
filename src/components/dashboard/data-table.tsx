@@ -26,6 +26,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   filterColumn: string;
   filterPlaceholder: string;
+  noResultsText: string;
 }
 
 export function DataTable<TData, TValue>({
@@ -33,6 +34,7 @@ export function DataTable<TData, TValue>({
   data,
   filterColumn,
   filterPlaceholder,
+  noResultsText,
 }: DataTableProps<TData, TValue>) {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const table = useReactTable({
@@ -101,7 +103,7 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  {noResultsText}
                 </TableCell>
               </TableRow>
             )}

@@ -7,7 +7,7 @@ import { ActionsMenu } from "./actions-menu";
 import { KeyRound } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
-export const columns = ({ deletePassword }: { deletePassword: (id: string) => void }): ColumnDef<StoredPassword>[] => [
+export const columns = ({ deletePassword, translations }: { deletePassword: (id: string) => void; translations: any }): ColumnDef<StoredPassword>[] => [
     {
         accessorKey: 'icon',
         header: '',
@@ -17,12 +17,12 @@ export const columns = ({ deletePassword }: { deletePassword: (id: string) => vo
     },
   {
     accessorKey: "password",
-    header: "Password",
+    header: translations.dashboard.columns.password,
     cell: ({ row }) => <span className="font-mono">{row.original.password}</span>,
   },
   {
     accessorKey: 'strength',
-    header: 'Strength',
+    header: translations.dashboard.columns.strength,
     cell: ({ row }) => {
       const p = row.original;
       let strength = 0;
@@ -31,19 +31,20 @@ export const columns = ({ deletePassword }: { deletePassword: (id: string) => vo
       if (p.includeUppercase) strength++;
       if (p.includeNumbers) strength++;
       if (p.includeSymbols) strength++;
-
-      if (strength < 2) return <Badge variant="destructive">Weak</Badge>;
-      if (strength < 4) return <Badge variant="secondary">Medium</Badge>;
-      return <Badge>Strong</Badge>;
+      
+      const strengthLabels = translations.password.strength;
+      if (strength < 2) return <Badge variant="destructive">{strengthLabels.weak}</Badge>;
+      if (strength < 4) return <Badge variant="secondary">{strengthLabels.medium}</Badge>;
+      return <Badge>{strengthLabels.strong}</Badge>;
     },
   },
   {
     accessorKey: "createdAt",
-    header: "Saved On",
+    header: translations.dashboard.columns.savedOn,
     cell: ({ row }) => {
         const { createdAt } = row.original;
         if (!createdAt || typeof createdAt.toDate !== 'function') {
-            return "Just now";
+            return translations.dashboard.columns.justNow;
         }
         return format(createdAt.toDate(), "PPpp");
     },
@@ -56,7 +57,7 @@ export const columns = ({ deletePassword }: { deletePassword: (id: string) => vo
         <ActionsMenu
           onDelete={() => deletePassword(password.id!)}
           copyItems={[
-            { label: 'Copy Password', value: password.password },
+            { label: translations.dashboard.actions.copyPassword, value: password.password },
           ]}
         />
       );

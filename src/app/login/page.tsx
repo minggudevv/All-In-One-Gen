@@ -20,6 +20,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Zap } from "lucide-react";
+import { useLanguage } from "@/hooks/use-language";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -30,6 +31,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
   const { toast } = useToast();
+  const { translations } = useLanguage();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -43,15 +45,15 @@ export default function LoginPage() {
     try {
       await login(values);
       toast({
-        title: "Login Successful",
-        description: "Welcome back!",
+        title: translations.toasts.loginSuccess.title,
+        description: translations.toasts.loginSuccess.description,
       });
       router.push("/dashboard");
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Login Failed",
-        description: error.message || "An error occurred. Please try again.",
+        title: translations.toasts.loginFailed.title,
+        description: error.message || translations.toasts.loginFailed.description,
       });
     }
   };
@@ -63,8 +65,8 @@ export default function LoginPage() {
           <div className="flex justify-center items-center mb-4">
              <Zap className="h-8 w-8 text-primary" />
           </div>
-          <CardTitle className="font-headline text-3xl">Welcome Back!</CardTitle>
-          <CardDescription>Enter your credentials to access your account.</CardDescription>
+          <CardTitle className="font-headline text-3xl">{translations.login.title}</CardTitle>
+          <CardDescription>{translations.login.subtitle}</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -74,7 +76,7 @@ export default function LoginPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>{translations.login.form.email}</FormLabel>
                     <FormControl>
                       <Input placeholder="name@example.com" {...field} />
                     </FormControl>
@@ -87,7 +89,7 @@ export default function LoginPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>{translations.login.form.password}</FormLabel>
                     <FormControl>
                       <Input type="password" placeholder="••••••••" {...field} />
                     </FormControl>
@@ -96,14 +98,14 @@ export default function LoginPage() {
                 )}
               />
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? "Logging in..." : "Log In"}
+                {form.formState.isSubmitting ? translations.login.buttons.loggingIn : translations.login.buttons.logIn}
               </Button>
             </form>
           </Form>
           <div className="mt-6 text-center text-sm">
-            Don't have an account?{" "}
+            {translations.login.signupPrompt.message}{" "}
             <Link href="/signup" className="font-semibold text-primary hover:underline">
-              Sign up
+              {translations.login.signupPrompt.link}
             </Link>
           </div>
         </CardContent>

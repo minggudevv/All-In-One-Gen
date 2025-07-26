@@ -17,7 +17,7 @@ const customIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
-const MapRenderer = ({ lat, lon, isDialog = false }: { lat: number; lon: number; isDialog?: boolean }) => {
+const MapRenderer = ({ lat, lon, isDialog = false, popupText }: { lat: number; lon: number; isDialog?: boolean; popupText: string }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
 
@@ -35,7 +35,7 @@ const MapRenderer = ({ lat, lon, isDialog = false }: { lat: number; lon: number;
 
       L.marker([lat, lon], { icon: customIcon })
        .addTo(map)
-       .bindPopup("Approximate location.");
+       .bindPopup(popupText);
 
       mapRef.current = map;
 
@@ -53,7 +53,7 @@ const MapRenderer = ({ lat, lon, isDialog = false }: { lat: number; lon: number;
         mapRef.current = null;
       }
     };
-  }, [lat, lon, isDialog]);
+  }, [lat, lon, isDialog, popupText]);
 
   return (
     <div
@@ -65,7 +65,7 @@ const MapRenderer = ({ lat, lon, isDialog = false }: { lat: number; lon: number;
 };
 
 
-const MapView = ({ lat, lon }: { lat: number; lon: number }) => {
+const MapView = ({ lat, lon, translations }: { lat: number; lon: number; translations: any }) => {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -73,24 +73,24 @@ const MapView = ({ lat, lon }: { lat: number; lon: number }) => {
   }, []);
 
   if (!isClient) {
-    return <div className="rounded-md overflow-hidden h-48 bg-muted flex items-center justify-center"><p className="text-muted-foreground text-sm">Loading map...</p></div>;
+    return <div className="rounded-md overflow-hidden h-48 bg-muted flex items-center justify-center"><p className="text-muted-foreground text-sm">{translations.map.loading}</p></div>;
   }
 
   return (
     <div className="relative">
-      <MapRenderer lat={lat} lon={lon} />
+      <MapRenderer lat={lat} lon={lon} popupText={translations.map.popup} />
       <Dialog>
         <DialogTrigger asChild>
           <Button variant="outline" size="icon" className="absolute top-2 right-2 z-10 bg-background/70 hover:bg-background/90">
              <Expand className="h-4 w-4" />
-             <span className="sr-only">Besarkan Peta</span>
+             <span className="sr-only">{translations.map.enlarge}</span>
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-4xl w-full p-2 sm:p-4">
            <DialogHeader>
-             <DialogTitle className="sr-only">Peta Diperbesar</DialogTitle>
+             <DialogTitle className="sr-only">{translations.map.enlargedTitle}</DialogTitle>
            </DialogHeader>
-           <MapRenderer lat={lat} lon={lon} isDialog={true} />
+           <MapRenderer lat={lat} lon={lon} isDialog={true} popupText={translations.map.popup} />
         </DialogContent>
       </Dialog>
     </div>

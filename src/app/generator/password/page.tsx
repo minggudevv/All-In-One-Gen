@@ -64,8 +64,8 @@ export default function PasswordGeneratorPage() {
     navigator.clipboard.writeText(password);
     setIsCopied(true);
     toast({
-      title: "Copied!",
-      description: "Password has been copied to your clipboard.",
+      title: translations.toasts.copied,
+      description: translations.toasts.password.copiedDesc,
     });
     setTimeout(() => setIsCopied(false), 2000);
   };
@@ -83,15 +83,15 @@ export default function PasswordGeneratorPage() {
         createdAt: serverTimestamp(),
       });
       toast({
-        title: "Success!",
-        description: "Password saved to your dashboard.",
+        title: translations.toasts.success,
+        description: translations.toasts.password.saveSuccess,
       });
     } catch (error) {
       console.error("Failed to save password:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to save password. Please try again.",
+        title: translations.toasts.error,
+        description: translations.toasts.password.saveError,
       });
     } finally {
       setIsSaving(false);
@@ -107,9 +107,10 @@ export default function PasswordGeneratorPage() {
     if (includeNumbers) strength++;
     if (includeSymbols) strength++;
 
-    if (strength < 2) return { label: 'Weak', color: 'bg-red-500' };
-    if (strength < 4) return { label: 'Medium', color: 'bg-yellow-500' };
-    return { label: 'Strong', color: 'bg-green-500' };
+    const strengthLabels = translations.password.strength;
+    if (strength < 2) return { label: strengthLabels.weak, color: 'bg-red-500' };
+    if (strength < 4) return { label: strengthLabels.medium, color: 'bg-yellow-500' };
+    return { label: strengthLabels.strong, color: 'bg-green-500' };
   };
 
   const strength = getStrength();
@@ -124,9 +125,9 @@ export default function PasswordGeneratorPage() {
   return (
     <div className="mx-auto max-w-2xl">
       <div className="text-center mb-12">
-        <h1 className="font-headline text-4xl font-bold tracking-tight lg:text-5xl">Password Generator</h1>
+        <h1 className="font-headline text-4xl font-bold tracking-tight lg:text-5xl">{translations.password.title}</h1>
         <p className="mt-4 text-lg text-muted-foreground">
-          Create strong, secure, and random passwords to protect your accounts.
+          {translations.password.subtitle}
         </p>
       </div>
 
@@ -137,7 +138,7 @@ export default function PasswordGeneratorPage() {
               readOnly
               value={password}
               className="pr-12 h-14 text-xl font-mono tracking-wider"
-              aria-label="Generated Password"
+              aria-label={translations.password.ariaLabel}
             />
             <Button
               variant="ghost"
@@ -162,7 +163,7 @@ export default function PasswordGeneratorPage() {
         <CardContent className="space-y-6">
           <div className="space-y-4">
             <Label htmlFor="length" className="flex justify-between">
-              <span>Password Length</span>
+              <span>{translations.password.options.length}</span>
               <span className="font-bold text-primary">{length}</span>
             </Label>
             <Slider
@@ -181,7 +182,7 @@ export default function PasswordGeneratorPage() {
                 checked={includeUppercase}
                 onCheckedChange={(checked) => setIncludeUppercase(Boolean(checked))}
               />
-              <Label htmlFor="uppercase" className="cursor-pointer">Uppercase (A-Z)</Label>
+              <Label htmlFor="uppercase" className="cursor-pointer">{translations.password.options.uppercase}</Label>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox
@@ -189,7 +190,7 @@ export default function PasswordGeneratorPage() {
                 checked={includeNumbers}
                 onCheckedChange={(checked) => setIncludeNumbers(Boolean(checked))}
               />
-              <Label htmlFor="numbers" className="cursor-pointer">Numbers (0-9)</Label>
+              <Label htmlFor="numbers" className="cursor-pointer">{translations.password.options.numbers}</Label>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox
@@ -197,25 +198,25 @@ export default function PasswordGeneratorPage() {
                 checked={includeSymbols}
                 onCheckedChange={(checked) => setIncludeSymbols(Boolean(checked))}
               />
-              <Label htmlFor="symbols" className="cursor-pointer">Symbols (!@#)</Label>
+              <Label htmlFor="symbols" className="cursor-pointer">{translations.password.options.symbols}</Label>
             </div>
           </div>
         </CardContent>
         <CardFooter className="flex-col sm:flex-row gap-2">
           <Button onClick={generatePassword} size="lg" className="w-full">
             <RefreshCw className="mr-2 h-4 w-4" />
-            Generate New Password
+            {translations.password.buttons.generate}
           </Button>
           {user ? (
              <Button onClick={handleSavePassword} disabled={isSaving} size="lg" variant="outline" className="w-full">
                 <Save className={`mr-2 h-4 w-4 ${isSaving ? 'animate-spin' : ''}`} />
-                {isSaving ? "Saving..." : "Save to Dashboard"}
+                {isSaving ? translations.password.buttons.saving : translations.password.buttons.save}
              </Button>
           ) : (
             <Button asChild size="lg" variant="outline" className="w-full">
                 <Link href="/login">
                   <LogIn className="mr-2 h-4 w-4" />
-                  Log in to Save
+                  {translations.password.buttons.loginToSave}
                 </Link>
              </Button>
           )}

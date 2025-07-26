@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useLanguage } from "@/hooks/use-language";
 
 // Dynamically import the map component to avoid SSR issues
 const MapView = dynamic(() => import("@/components/map-view"), {
@@ -29,6 +29,7 @@ const MapView = dynamic(() => import("@/components/map-view"), {
 export default function IdentityViewPage() {
   const [identity, setIdentity] = useState<Identity | null>(null);
   const [loading, setLoading] = useState(true);
+  const { translations } = useLanguage();
 
   useEffect(() => {
     const storedIdentity = sessionStorage.getItem("view-identity");
@@ -79,11 +80,9 @@ export default function IdentityViewPage() {
     return (
       <div className="container mx-auto flex min-h-[calc(100vh-8rem)] items-center justify-center text-center">
         <div className="space-y-4">
-          <h1 className="text-4xl font-bold">Identity Not Found</h1>
+          <h1 className="text-4xl font-bold">{translations.identityView.notFound.title}</h1>
           <p className="text-muted-foreground">
-            The identity you are looking for could not be found.
-            <br />
-            Please go back to the generator and create a new one.
+            {translations.identityView.notFound.description}
           </p>
         </div>
       </div>
@@ -100,7 +99,7 @@ export default function IdentityViewPage() {
                     {name.first} {name.last}
                 </h1>
                 <p className="mt-2 text-xl text-muted-foreground">
-                    Digital Identity Profile
+                    {translations.identityView.subtitle}
                 </p>
             </header>
 
@@ -121,46 +120,47 @@ export default function IdentityViewPage() {
                         </CardContent>
                     </Card>
 
-                    <InfoCard icon={<User className="h-6 w-6 text-primary" />} title="Personal Info">
+                    <InfoCard icon={<User className="h-6 w-6 text-primary" />} title={translations.identityView.cards.personal.title}>
                          <div className="space-y-2 text-sm">
-                            <p><strong>Age:</strong> {dob.age}</p>
-                            <p><strong>Birthday:</strong> {new Date(dob.date).toLocaleDateString()}</p>
-                            <p><strong>Nationality:</strong> US</p>
+                            <p><strong>{translations.identityView.cards.personal.age}:</strong> {dob.age}</p>
+                            <p><strong>{translations.identityView.cards.personal.birthday}:</strong> {new Date(dob.date).toLocaleDateString()}</p>
+                            <p><strong>{translations.identityView.cards.personal.nationality}:</strong> US</p>
                         </div>
                     </InfoCard>
                 </div>
 
                 <div className="md:col-span-2 space-y-8">
-                     <InfoCard icon={<Mail className="h-6 w-6 text-primary" />} title="Contact Details">
+                     <InfoCard icon={<Mail className="h-6 w-6 text-primary" />} title={translations.identityView.cards.contact.title}>
                         <div className="space-y-4">
                              <div>
-                                <p className="text-sm font-semibold text-muted-foreground">Email Address</p>
+                                <p className="text-sm font-semibold text-muted-foreground">{translations.identityView.cards.contact.email}</p>
                                 <p className="text-lg">{email}</p>
                              </div>
                              <div>
-                                <p className="text-sm font-semibold text-muted-foreground">Phone Number</p>
+                                <p className="text-sm font-semibold text-muted-foreground">{translations.identityView.cards.contact.phone}</p>
                                 <p className="text-lg">{phone}</p>
                              </div>
                         </div>
                     </InfoCard>
 
-                     <InfoCard icon={<MapPin className="h-6 w-6 text-primary" />} title="Location">
+                     <InfoCard icon={<MapPin className="h-6 w-6 text-primary" />} title={translations.identityView.cards.location.title}>
                         <div className="space-y-4">
                             <div>
-                                <p className="text-sm font-semibold text-muted-foreground">Full Address</p>
+                                <p className="text-sm font-semibold text-muted-foreground">{translations.identityView.cards.location.address}</p>
                                 <p className="text-lg">{`${location.street.number} ${location.street.name}, ${location.city}, ${location.state} ${location.postcode}, ${location.country}`}</p>
                             </div>
                            
                            <MapView 
                                 lat={parseFloat(location.coordinates.latitude)}
                                 lon={parseFloat(location.coordinates.longitude)}
+                                translations={translations}
                             />
                            
                         </div>
                     </InfoCard>
                     
                     {identity.enhancedBackstory && (
-                         <InfoCard icon={<Briefcase className="h-6 w-6 text-primary" />} title="AI Generated Backstory">
+                         <InfoCard icon={<Briefcase className="h-6 w-6 text-primary" />} title={translations.identityView.cards.backstory.title}>
                            <p className="text-lg italic text-muted-foreground">"{identity.enhancedBackstory}"</p>
                         </InfoCard>
                     )}

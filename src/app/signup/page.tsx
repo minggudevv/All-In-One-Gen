@@ -25,6 +25,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import {auth} from "@/lib/firebase";
+import { useLanguage } from "@/hooks/use-language";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -43,6 +44,7 @@ export default function SignupPage() {
   const router = useRouter();
   const { signup } = useAuth();
   const { toast } = useToast();
+  const { translations } = useLanguage();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -69,15 +71,15 @@ export default function SignupPage() {
         });
       }
       toast({
-        title: "Account Created",
-        description: "You have been successfully signed up.",
+        title: translations.toasts.signupSuccess.title,
+        description: translations.toasts.signupSuccess.description,
       });
       router.push("/dashboard");
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Sign Up Failed",
-        description: error.message || "An error occurred. Please try again.",
+        title: translations.toasts.signupFailed.title,
+        description: error.message || translations.toasts.signupFailed.description,
       });
     }
   };
@@ -89,8 +91,8 @@ export default function SignupPage() {
            <div className="flex justify-center items-center mb-4">
              <Zap className="h-8 w-8 text-primary" />
           </div>
-          <CardTitle className="font-headline text-3xl">Create an Account</CardTitle>
-          <CardDescription>Start generating data in seconds. It's free!</CardDescription>
+          <CardTitle className="font-headline text-3xl">{translations.signup.title}</CardTitle>
+          <CardDescription>{translations.signup.subtitle}</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -100,7 +102,7 @@ export default function SignupPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>{translations.signup.form.email}</FormLabel>
                     <FormControl>
                       <Input placeholder="name@example.com" {...field} />
                     </FormControl>
@@ -113,7 +115,7 @@ export default function SignupPage() {
                 name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Username</FormLabel>
+                    <FormLabel>{translations.signup.form.username}</FormLabel>
                     <FormControl>
                       <Input placeholder="yourusername" {...field} />
                     </FormControl>
@@ -126,7 +128,7 @@ export default function SignupPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>{translations.signup.form.password}</FormLabel>
                     <FormControl>
                       <Input type="password" placeholder="••••••••" {...field} />
                     </FormControl>
@@ -139,7 +141,7 @@ export default function SignupPage() {
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
+                    <FormLabel>{translations.signup.form.confirmPassword}</FormLabel>
                     <FormControl>
                       <Input type="password" placeholder="••••••••" {...field} />
                     </FormControl>
@@ -160,18 +162,18 @@ export default function SignupPage() {
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel>
-                        I agree to the{" "}
+                        {translations.signup.form.terms.start}{" "}
                         <Link href="/terms" className="underline text-primary">
-                          Terms of Service
+                          {translations.signup.form.terms.termsLink}
                         </Link>{" "}
-                        and{" "}
+                        {translations.signup.form.terms.and}{" "}
                         <Link href="/privacy" className="underline text-primary">
-                          Privacy Policy
+                          {translations.signup.form.terms.privacyLink}
                         </Link>
                         .
                       </FormLabel>
                       <FormDescription>
-                        You must agree to the terms to create an account.
+                        {translations.signup.form.terms.description}
                       </FormDescription>
                     </div>
                     <FormMessage />
@@ -179,14 +181,14 @@ export default function SignupPage() {
                 )}
               />
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? "Creating account..." : "Sign Up"}
+                {form.formState.isSubmitting ? translations.signup.buttons.creating : translations.signup.buttons.signup}
               </Button>
             </form>
           </Form>
           <div className="mt-6 text-center text-sm">
-            Already have an account?{" "}
+            {translations.signup.loginPrompt.message}{" "}
             <Link href="/login" className="font-semibold text-primary hover:underline">
-              Log in
+              {translations.signup.loginPrompt.link}
             </Link>
           </div>
         </CardContent>
