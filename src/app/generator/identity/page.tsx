@@ -31,12 +31,30 @@ import {
   Check,
 } from "lucide-react";
 import Link from "next/link";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const MapView = dynamic(() => import("@/components/map-view"), {
   ssr: false,
   loading: () => <div className="rounded-md overflow-hidden h-48 bg-muted flex items-center justify-center"><p className="text-muted-foreground text-sm">Loading map...</p></div>
 });
+
+const LoginPromptDialog = ({ open, onOpenChange, title, description }: { open: boolean, onOpenChange: (open: boolean) => void, title: string, description: string }) => (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>{title}</DialogTitle>
+                <DialogDescription>{description}</DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+                 <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+                <Button asChild>
+                    <Link href="/login">Log In</Link>
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
+);
+
 
 export default function IdentityGeneratorPage() {
   const [identity, setIdentity] = useState<Identity | null>(null);
@@ -46,6 +64,9 @@ export default function IdentityGeneratorPage() {
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isCorrectingMap, setIsCorrectingMap] = useState(false);
   const [isBackstoryCopied, setIsBackstoryCopied] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [loginPromptContent, setLoginPromptContent] = useState({ title: "", description: ""});
+
 
   const { user } = useAuth();
   const { toast } = useToast();
@@ -116,6 +137,18 @@ export default function IdentityGeneratorPage() {
     fetchIdentity();
   }, [fetchIdentity]);
   
+  const handleGenerateBackstory = () => {
+    if (!user) {
+        setLoginPromptContent({
+            title: "Log in to Generate a Backstory",
+            description: "Our AI-powered backstory generation is an exclusive feature for logged-in users."
+        });
+        setShowLoginPrompt(true);
+        return;
+    }
+    generateBackstory();
+  }
+
   const generateBackstory = async () => {
     if (!identity) return;
     setIsEnhancing(true);
@@ -148,7 +181,19 @@ export default function IdentityGeneratorPage() {
   };
 
 
-  const handleCorrectMap = async () => {
+  const handleCorrectMap = () => {
+    if(!user) {
+        setLoginPromptContent({
+            title: "Log in to Correct Map Location",
+            description: "Our AI-powered map correction is an exclusive feature for logged-in users."
+        });
+        setShowLoginPrompt(true);
+        return;
+    }
+    correctMap();
+  }
+
+  const correctMap = async () => {
     if (!identity) return;
     setIsCorrectingMap(true);
     try {
@@ -224,6 +269,12 @@ export default function IdentityGeneratorPage() {
 
   return (
     <div className="mx-auto max-w-4xl">
+       <LoginPromptDialog 
+            open={showLoginPrompt} 
+            onOpenChange={setShowLoginPrompt}
+            title={loginPromptContent.title}
+            description={loginPromptContent.description}
+        />
       <div className="text-center mb-12">
         <h1 className="font-headline text-4xl font-bold tracking-tight lg:text-5xl">Fake Identity Generator</h1>
         <p className="mt-4 text-lg text-muted-foreground">
@@ -279,16 +330,10 @@ export default function IdentityGeneratorPage() {
                           lat={parseFloat(identity.location.coordinates.latitude)}
                           lon={parseFloat(identity.location.coordinates.longitude)}
                         />
-                        {user ? (
-                             <Button variant="outline" size="sm" className="mt-2" onClick={handleCorrectMap} disabled={isCorrectingMap}>
-                                <Compass className={`mr-2 h-4 w-4 ${isCorrectingMap ? 'animate-spin' : ''}`} />
-                                {isCorrectingMap ? "Correcting..." : "Correct Map Location"}
-                            </Button>
-                        ) : (
-                            <p className="text-xs text-muted-foreground mt-2">
-                                <Link href="/login" className="underline">Log in</Link> for a more accurate map.
-                            </p>
-                        )}
+                         <Button variant="outline" size="sm" className="mt-2" onClick={handleCorrectMap} disabled={isCorrectingMap}>
+                            <Compass className={`mr-2 h-4 w-4 ${isCorrectingMap ? 'animate-spin' : ''}`} />
+                            {isCorrectingMap ? "Correcting..." : "Correct Map Location"}
+                        </Button>
                    </div>
                 </IdentityInfoRow>
                 <IdentityInfoRow icon={<Cake className="h-5 w-5" />} label="Date of Birth" value={`${new Date(identity.dob.date).toLocaleDateString()} (Age ${identity.dob.age})`} />
@@ -315,15 +360,9 @@ export default function IdentityGeneratorPage() {
                         </div>
                       ) : (
                         <div>
-                          {user ? (
-                            <Button variant="link" className="p-0 h-auto" onClick={generateBackstory} disabled={isEnhancing}>
+                            <Button variant="link" className="p-0 h-auto" onClick={handleGenerateBackstory} disabled={isEnhancing}>
                                 {isEnhancing ? 'Generating...' : 'Generate Backstory'}
                             </Button>
-                          ) : (
-                            <p className="text-sm text-muted-foreground">
-                              <Link href="/login" className="underline">Log in</Link> to generate a backstory.
-                            </p>
-                          )}
                         </div>
                       )}
                     </div>
