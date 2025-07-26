@@ -57,13 +57,10 @@ export default function SignupPage() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      // You might need to adjust your signup function in use-auth.ts
-      // to accept a username and potentially store it in Firestore
       await signup({ email: values.email, password: values.password, username: values.username });
       const currentUser = auth.currentUser;
 
       if (currentUser) {
-        // Buat dokumen pengguna di Firestore
         await setDoc(doc(db, "users", currentUser.uid), {
           uid: currentUser.uid,
           email: values.email,
@@ -111,7 +108,6 @@ export default function SignupPage() {
                   </FormItem>
                 )}
               />
-              {/* Username Field */}
               <FormField
                 control={form.control}
                 name="username"
@@ -138,7 +134,6 @@ export default function SignupPage() {
                   </FormItem>
                 )}
               />
-              {/* Confirm Password Field */}
               <FormField
                 control={form.control}
                 name="confirmPassword"
@@ -152,7 +147,6 @@ export default function SignupPage() {
                   </FormItem>
                 )}
               />
-              {/* Terms of Service and Privacy Policy Checkbox */}
               <FormField
                 control={form.control}
                 name="agreeToTerms"

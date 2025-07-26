@@ -32,7 +32,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
-      router.push("/login");
+      // This is handled by the layout now
       return;
     }
 
@@ -142,7 +142,7 @@ export default function DashboardPage() {
         <div>
           <h1 className="font-headline text-4xl font-bold tracking-tight">Dashboard</h1>
           <p className="mt-2 text-lg text-muted-foreground">
-            Manage your saved identities, emails, and passwords here.
+            Manage your saved generated data.
           </p>
         </div>
       </div>
@@ -216,5 +216,3 @@ const EmptyState = ({title, description, cta, href}: {title: string, description
         </CardContent>
     </Card>
 )
-
-    
