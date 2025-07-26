@@ -188,19 +188,7 @@ export default function CredentialsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="flex items-center gap-4 mb-8">
-        <ShieldCheck className="h-10 w-10 text-primary" />
-        <div>
-          <h1 className="font-headline text-4xl font-bold tracking-tight">
-            Credential Manager
-          </h1>
-          <p className="mt-1 text-lg text-muted-foreground">
-            Save and manage your sensitive logins securely.
-          </p>
-        </div>
-      </div>
-      
+    <div className="w-full">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div className="lg:col-span-1">
           <Card>
