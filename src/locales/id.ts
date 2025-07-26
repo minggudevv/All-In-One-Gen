@@ -1,3 +1,4 @@
+
 const translations = {
   header: {
     identity: "Identitas",
@@ -18,6 +19,8 @@ const translations = {
     emailGeneratorDesc: "Hasilkan alamat email sementara dan sekali pakai secara instan.",
     passwordGenerator: "Generator Kata Sandi",
     passwordGeneratorDesc: "Hasilkan kata sandi yang kuat, aman, dan acak untuk melindungi akun Anda.",
+    credentialManager: "Manajer Kredensial",
+    credentialManagerDesc: "Simpan dan kelola login dan kata sandi penting Anda dengan aman menggunakan enkripsi sisi klien.",
     tryNow: "Coba sekarang",
   },
    toasts: {

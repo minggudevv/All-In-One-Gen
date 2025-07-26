@@ -1,3 +1,4 @@
+
 const translations = {
   header: {
     identity: "Identity",
@@ -18,6 +19,8 @@ const translations = {
     emailGeneratorDesc: "Instantly generate temporary and disposable email addresses.",
     passwordGenerator: "Password Generator",
     passwordGeneratorDesc: "Produce strong, secure, and random passwords to protect your accounts.",
+    credentialManager: "Credential Manager",
+    credentialManagerDesc: "Securely save and manage your important logins and passwords with client-side encryption.",
     tryNow: "Try now",
   },
   toasts: {
