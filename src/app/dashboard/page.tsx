@@ -34,7 +34,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
-      router.push("/login");
+      // This is handled by the layout now
       return;
     }
 
@@ -119,19 +119,16 @@ export default function DashboardPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="space-y-4">
-          <Skeleton className="h-10 w-1/4" />
-          <Skeleton className="h-8 w-2/4" />
-          <div className="border rounded-md p-4">
-            <div className="flex justify-between items-center mb-4">
-              <Skeleton className="h-8 w-1/3" />
-            </div>
-            <div className="space-y-2">
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-            </div>
+      <div className="space-y-4">
+        <Skeleton className="h-10 w-full" />
+        <div className="border rounded-md p-4">
+          <div className="flex justify-between items-center mb-4">
+            <Skeleton className="h-8 w-1/3" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
           </div>
         </div>
       </div>
@@ -139,6 +136,10 @@ export default function DashboardPage() {
   }
 
   return (
+    <div className="w-full">
+      <Tabs defaultValue="identities" className="mt-6">
+        <div className="flex justify-between items-center mb-4">
+=======
     <div className="container mx-auto px-4 py-12">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <div>

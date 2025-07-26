@@ -108,7 +108,7 @@ export default function IdentityViewPage() {
                     <Card className="overflow-hidden text-center">
                         <CardContent className="p-6">
                             <Image
-                                src={picture.large}
+                                src={picture.thumbnail}
                                 alt={`Profile of ${name.first} ${name.last}`}
                                 width={200}
                                 height={200}

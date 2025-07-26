@@ -1,8 +1,9 @@
+
 "use client";
 
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowRight, UserSquare, Mail, LockKeyhole } from 'lucide-react';
+import { ArrowRight, UserSquare, Mail, LockKeyhole, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/hooks/use-language';
 
@@ -27,6 +28,12 @@ export default function Home() {
       href: '/generator/password',
       icon: <LockKeyhole className="h-10 w-10 text-primary" />,
     },
+    {
+      title: translations.home.credentialManager,
+      description: translations.home.credentialManagerDesc,
+      href: '/dashboard/credentials',
+      icon: <ShieldCheck className="h-10 w-10 text-primary" />,
+    }
   ];
 
   return (
@@ -49,7 +56,7 @@ export default function Home() {
 
       <section className="bg-muted/50 py-16 sm:py-24">
         <div className="container mx-auto">
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
             {generatorFeatures.map((feature) => (
               <Link href={feature.href} key={feature.title} className="group">
                 <Card className="flex h-full flex-col overflow-hidden border-2 border-transparent transition-all duration-300 ease-in-out hover:border-primary hover:shadow-2xl">

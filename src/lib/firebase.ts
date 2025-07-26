@@ -5,6 +5,11 @@ import { getFirestore } from "firebase/firestore";
 // Import getAnalytics conditionally
 import { getAnalytics } from "firebase/analytics";
 
+// Throw an error if the API key is missing
+if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+  throw new Error("Missing Firebase API Key. Please make sure to set NEXT_PUBLIC_FIREBASE_API_KEY in your .env file");
+}
+
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,

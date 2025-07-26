@@ -6,7 +6,9 @@ export interface LoginCredentials {
   password: string;
 }
 
-export interface SignUpCredentials extends LoginCredentials {}
+export interface SignUpCredentials extends LoginCredentials {
+  username: string;
+}
 
 export type Identity = BasicIdentity & {
   id?: string;
@@ -27,5 +29,14 @@ export interface StoredPassword {
     includeUppercase: boolean;
     includeNumbers: boolean;
     includeSymbols: boolean;
+    createdAt?: FieldValue;
+}
+
+export interface StoredCredential {
+    id?: string;
+    service: string;
+    email: string;
+    encryptedData: string;
+    iv: string;
     createdAt?: FieldValue;
 }

@@ -7,10 +7,10 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  Auth,
 } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import type { LoginCredentials, SignUpCredentials } from "@/types";
+import { generateAndStoreKey, clearStoredKey } from "@/lib/crypto";
 
 interface AuthContextType {
   user: User | null;
@@ -35,16 +35,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => unsubscribe();
   }, []);
 
-  const login = (credentials: LoginCredentials) => {
-    return signInWithEmailAndPassword(auth, credentials.email, credentials.password);
+  const login = async (credentials: LoginCredentials) => {
+    const userCredential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
+    // Generate and store the key on login to be used for decryption
+    await generateAndStoreKey(credentials.password);
+    return userCredential;
   };
 
-  const signup = (credentials: SignUpCredentials) => {
-    return createUserWithEmailAndPassword(auth, credentials.email, credentials.password);
+  const signup = async (credentials: SignUpCredentials) => {
+    const userCredential = await createUserWithEmailAndPassword(auth, credentials.email, credentials.password);
+    // Generate and store the key on signup
+    await generateAndStoreKey(credentials.password);
+    return userCredential;
   };
 
-  const logout = () => {
-    return signOut(auth);
+  const logout = async () => {
+    await signOut(auth);
+    // Clear the key from storage on logout
+    clearStoredKey();
   };
 
   const value = {

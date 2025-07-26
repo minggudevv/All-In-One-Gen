@@ -27,7 +27,6 @@ export default function PasswordGeneratorPage() {
   const { user } = useAuth();
   const { translations } = useLanguage();
 
-
   const generatePassword = useCallback(() => {
     const lowerCaseChars = "abcdefghijklmnopqrstuvwxyz";
     const upperCaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -45,10 +44,14 @@ export default function PasswordGeneratorPage() {
     }
 
     let newPassword = "";
+    const randomValues = new Uint32Array(length);
+    window.crypto.getRandomValues(randomValues);
+
     for (let i = 0; i < length; i++) {
-      const randomIndex = Math.floor(Math.random() * charPool.length);
-      newPassword += charPool[randomIndex];
+        const randomIndex = randomValues[i] % charPool.length;
+        newPassword += charPool[randomIndex];
     }
+
     setPassword(newPassword);
     setIsCopied(false);
   }, [length, includeUppercase, includeNumbers, includeSymbols]);
